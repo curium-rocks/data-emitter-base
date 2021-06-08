@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    job: ci-data-emitters
+spec:
+  imagePullSecrets:
+  - name: harbor
+  containers:
+  - name: node-build
+    image: registry.curium.rocks/hub-proxy/library/node:alpine3.13
+    command:
+    - cat
+    tty: true
