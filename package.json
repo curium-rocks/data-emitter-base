@@ -1,7 +1,7 @@
 {
-  "name": "@curium.rocks/data-emitter-interfaces",
+  "name": "@curium.rocks/data-emitter-base",
   "version": "0.1.0",
-  "description": "A collection of typescript class interfaces that specify generic contracts with things that emit data",
+  "description": "A collection of typescript class interfaces and base classes that specify generic contracts with things that emit data",
   "main": "build/libs.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,13 +11,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://git.curium.rocks/curium.rocks/data-emitter-interfaces.git"
+    "url": "https://git.curium.rocks/curium.rocks/data-emitter-base.git"
   },
   "keywords": [
     "data",
     "emitter",
-    "class",
-    "interfaces",
     "typescript"
   ],
   "devDependencies": {
