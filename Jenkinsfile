@@ -15,17 +15,16 @@ pipeline {
     stage('Build') {
         steps {
             container('node-build') {
-                dir('hub') {
-                    // install dependencies
-                    sh 'npm ci'
-                    // compile typescript to js and create map files
-                    sh 'npm run build'
-                    // lint
-                    sh 'npm run lint'
-                    // check for vulnerabilities
-                    sh 'npm audit --production'
-                    // publish
-                }
+              // install dependencies
+              sh 'npm ci'
+              // compile typescript to js and create map files
+              sh 'npm run build'
+              // lint
+              sh 'npm run lint'
+              // check for vulnerabilities
+              sh 'npm audit --production'
+              sh 'npm run sonarscan'
+              // publish
             }
         }
     }

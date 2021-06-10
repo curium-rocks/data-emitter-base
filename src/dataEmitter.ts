@@ -11,15 +11,28 @@
 /**
  * 
  */
-export interface ISettings extends ITraceableAction {
+export interface ISettings {
     /**
      * 
      */
     readonly name: string;
+    /**
+     * 
+     */
+    readonly id: string;
+    /**
+     * 
+     */
+    readonly commLink: string;
 }
 
-export type ICommand = ITraceableAction
-export type IExecutionResult = ITraceableAction
+export interface ICommand extends ITraceableAction {
+    payload: unknown;
+}
+export interface IExecutionResult extends ITraceableAction {
+    success: boolean;
+    failureReason?: string;
+}
 
 /**
  * A data emission event
@@ -126,7 +139,7 @@ export interface IDataEmitter {
      * 
      * @param command 
      */
-    sendCommand(command:ICommand): Promise<IStatusEvent>;
+    sendCommand(command:ICommand): Promise<IExecutionResult>;
     /**
      * 
      */

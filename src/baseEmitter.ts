@@ -1,4 +1,4 @@
-import { IDataEmitter, IDataEvent, IDataEventListener, IDisposable, ISettings, IStatusChangeListener, IStatusEvent, ITraceableAction } from "./dataEmitter";
+import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDisposable, IExecutionResult, ISettings, IStatusChangeListener, IStatusEvent, ITraceableAction } from "./dataEmitter";
 
 /**
  * Abstract base class emitter that takes care of managing registrations of
@@ -83,6 +83,30 @@ export abstract class BaseEmitter implements IDataEmitter {
 
     /**
      * 
+     * @param {string} name 
+     */
+    protected setName(name:string): void {
+        this._name = name;
+    }
+
+    /**
+     * 
+     * @param {string} commLink 
+     */
+    protected setCommLink(commLink: string) : void {
+        this._commLinkDesc = commLink;
+    }
+
+    /**
+     * 
+     * @param {string} id 
+     */
+    protected setId(id: string) : void {
+        this._id = id;
+    }
+
+    /**
+     * 
      * @param {IStatusChangeListener} listener 
      * @return {IDisposable} 
      */
@@ -100,19 +124,19 @@ export abstract class BaseEmitter implements IDataEmitter {
      * @param {ISettings} settings 
      * @return {Promise<ITraceableAction}
      */
-    abstract applySettings(settings: ISettings): Promise<ITraceableAction>;
+    abstract applySettings(settings: ISettings & ITraceableAction): Promise<IExecutionResult>;
     
     /**
      * 
      * @param {ITraceableAction} command
-     * @return {Promise<IStatusEvent>} 
+     * @return {Promise<IExecutionResult>} 
      */
-    abstract sendCommand(command: ITraceableAction): Promise<IStatusEvent>;
+    abstract sendCommand(command: ICommand): Promise<IExecutionResult>;
 
     /**
      * @return {Promise<ITraceableAction>} 
      */
-    abstract probeStatus(): Promise<ITraceableAction>;
+    abstract probeStatus(): Promise<IExecutionResult>;
     
     /**
      * @return {Promise<IDataEvent>}
