@@ -1,8 +1,8 @@
 {
-  "name": "@curium.rocks/data-emitter-base",
+  "name": "data-emitter-base",
   "version": "0.1.1-alpha.1",
   "description": "A collection of typescript class interfaces and base classes that specify generic contracts with things that emit data",
-  "main": "build/libs.js",
+  "main": "build/src/lib.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "node_modules/typescript/bin/tsc --project ./",
