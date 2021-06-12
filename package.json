@@ -1,6 +1,6 @@
 {
   "name": "@curium.rocks/data-emitter-base",
-  "version": "0.1.1-alpha.1",
+  "version": "0.1.1-alpha.2",
   "description": "A collection of typescript class interfaces and base classes that specify generic contracts with things that emit data",
   "main": "build/src/lib.js",
   "scripts": {
@@ -8,7 +8,8 @@
     "build": "node_modules/typescript/bin/tsc --project ./",
     "lint": "eslint src --ext .ts",
     "clean": "rm -fr build",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "sonarscan": "sonar-scanner -Dsonar.qualitygate.wait=true -Dsonar.projectKey=data-emitter-base -Dsonar.sources=. -Dsonar.host.url=https://$SONAR_QUBE_HOST_NAME -Dsonar.login=$SONAR_LOGIN -Dsonar.javascript.lcov.reportPath=coverage/"
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.4.0",
+    "sonarqube-scanner": "^2.8.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4"
   },

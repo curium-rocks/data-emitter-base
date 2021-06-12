@@ -8,7 +8,20 @@ spec:
   - name: harbor
   containers:
   - name: node-build
-    image: registry.curium.rocks/hub-proxy/library/node:alpine3.13
+    image: registry.curium.rocks/hub-proxy/library/node:latest
     command:
     - cat
     tty: true
+    env: 
+    - name: SONAR_BINARY_CACHE
+      value: "/tmp/sonarqube-scanner-cache"
+    - name: SONAR_LOGIN
+      valueFrom:
+        secretKeyRef:
+          name: sonarpwd
+          key: password
+    - name: SONAR_QUBE_HOST_NAME
+      valueFrom:
+        secretKeyRef:
+          name: sonarhost
+          key: url
