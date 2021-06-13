@@ -19,7 +19,7 @@ pipeline {
               sh 'npm ci'
               // compile typescript to js and create map files
               sh 'npm run build'
-              // lint
+              sh 'npm test'              // lint
               sh 'npm run lint'
               // check for vulnerabilities
               sh 'npm audit --production'

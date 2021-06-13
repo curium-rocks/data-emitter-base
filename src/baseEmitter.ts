@@ -4,7 +4,7 @@ import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDisposable, IE
  * Abstract base class emitter that takes care of managing registrations of
  * listeners and cleanup on disposal
  */
-export abstract class BaseEmitter implements IDataEmitter {
+export abstract class BaseEmitter implements IDataEmitter, IDisposable {
     /**
      * Listener collection for data change listeners
      */
@@ -13,6 +13,41 @@ export abstract class BaseEmitter implements IDataEmitter {
      * Listener collection for status change listeners
      */
     private readonly _statusListeners: Set<IStatusChangeListener> = new Set<IStatusChangeListener>();
+
+    /**
+     * connected state
+     */
+    private _connected = false;
+
+    /**
+     * faulted state
+     */
+    private _faulted = false;
+
+    /**
+     * DC check interval handle
+     * @private
+     */
+    private _dcInterval?: number;
+
+    /**
+     * amount of time between dc checks
+     * @private
+     */
+    private _dcIntervalms?: number;
+
+    /**
+     * amount of time since successful message emission till we consider
+     * the state to be disconnected
+     * @private
+     */
+    private _dcThresholdMs = 60000;
+
+    /**
+     * The last time the source has successfully produced data
+     * @private
+     */
+    private _dcLastHeardTime?: Date;
 
     /**
      * @return {string} unique id for emitter
@@ -118,6 +153,102 @@ export abstract class BaseEmitter implements IDataEmitter {
             }
         }
     }
+
+    /**
+     * Clear any faults and notify listeners of change if change
+     */
+    protected clearIfFaulted(): void {
+        if(this._faulted) {
+            this._faulted = false;
+            this.notifyStatusListeners(this.buildStatusEvent());
+        }
+    }
+
+    /**
+     * faulted
+     */
+    protected faulted(): void {
+        if(!this._faulted) {
+            this._faulted = true;
+            this.notifyStatusListeners(this.buildStatusEvent());
+        }
+    }
+
+    /**
+     * connected
+     */
+    protected connected(): void {
+        if(!this._connected){
+            this._connected = true;
+            this.notifyStatusListeners(this.buildStatusEvent());
+        }
+    }
+
+    /**
+     * disconnected
+     */
+    protected disconnected(): void {
+        if(this._connected) {
+            this._connected = false;
+            this.notifyStatusListeners(this.buildStatusEvent());
+        }
+    }
+
+    /**
+     * 
+     * @return {IStatusEvent} 
+     */
+    protected buildStatusEvent(): IStatusEvent {
+        return {
+            connected: this._connected,
+            timestamp: new Date(),
+            bit: this._faulted
+        }
+    }
+
+    /**
+     * build a data event
+     * @param {unknown} data
+     * @return {IDataEvent}
+     */
+    protected buildDataEvent(data: unknown): IDataEvent {
+        return {
+            emitter: this,
+            timestamp: new Date(),
+            data: data,
+            meta: this.getMetaData()
+        }
+    }
+
+    /**
+     * Sets how frequently the dc check is executed
+     * @param {number} checkInterval
+     * @param {number} threshold
+     * @protected
+     */
+    protected setDCCheckInterval(checkInterval:number, threshold: number): void {
+        if(this._dcInterval) clearInterval(this._dcInterval);
+        this._dcIntervalms = checkInterval;
+        this._dcThresholdMs = threshold;
+        this._dcInterval = setInterval(this.dcHandler.bind(this), this._dcIntervalms);
+    }
+
+    /**
+     * Execute logic to detect disconnections and notify listeners
+     * @private
+     */
+    private dcHandler(): void {
+        if(this._dcLastHeardTime == null) {
+            this.disconnected();
+            return;
+        }
+        const now = new Date();
+        const last = this._dcLastHeardTime;
+        const delta = now.getMilliseconds() - last.getMilliseconds();
+        if(delta > this._dcThresholdMs) {
+            this.disconnected();
+        }
+    }
     
     /**
      * 
@@ -136,11 +267,24 @@ export abstract class BaseEmitter implements IDataEmitter {
     /**
      * @return {Promise<ITraceableAction>} 
      */
-    abstract probeStatus(): Promise<IExecutionResult>;
+    abstract probeStatus(): Promise<IStatusEvent>;
     
     /**
      * @return {Promise<IDataEvent>}
      */
     abstract probeCurrentData(): Promise<IDataEvent>;
+
+    /**
+     * @return {unknown}
+     */
+    abstract getMetaData(): unknown;
+
+    /**
+     * Cleanup any resources/timers
+     */
+    dispose(): void {
+        if(this._dcInterval) clearInterval(this._dcInterval);
+        this._dcInterval = undefined;
+    }
 
 }

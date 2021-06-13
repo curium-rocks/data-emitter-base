@@ -24,6 +24,11 @@ export interface ISettings {
      * 
      */
     readonly commLink: string;
+
+    /**
+     * additional settings
+     */
+    readonly additional: unknown;
 }
 
 export interface ICommand extends ITraceableAction {
@@ -143,7 +148,7 @@ export interface IDataEmitter {
     /**
      * 
      */
-    probeStatus(): Promise<IExecutionResult>;
+    probeStatus(): Promise<IStatusEvent>;
     /**
      * 
      */
