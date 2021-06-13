@@ -29,9 +29,14 @@ pipeline {
         }
     }
     stage('Publish Prerelease') {
-        /*when {
-            branch 'development'
-        }*/
+        when {
+            allOf {
+                branch 'development'
+                not {
+                    expression { env.CHANGE_AUTHOR.contains('Jenkins') }
+                }
+            }
+        }
         steps {
             container('node-build') {
                 sh 'git config user.email "jenkins@curium.rocks"'
@@ -49,13 +54,24 @@ pipeline {
     }
     stage('Publish') {
         when {
-            branch 'master'
+            allOf {
+                branch 'master'
+                not {
+                    expression { env.CHANGE_AUTHOR.contains('Jenkins') }
+                }
+            }
         }
         steps {
             container('node-build') {
                 sh 'git config --global user.email "jenkins@curium.rocks"'
                 sh 'git config --global user.name "Jenkins"'
                 sh 'npm version major'
+                sh 'git config credential.helper "/bin/bash ' + env.WORKSPACE + '/scripts/git-cred-helper.sh"'
+                withCredentials([usernamePassword(credentialsId: '8f3d53bd-754f-4df3-bc87-59ce5ba6e63e',
+                                 usernameVariable: 'GIT_USERNAME',
+                                 passwordVariable: 'GIT_PASSWORD')]){
+                    sh 'git push origin HEAD:master'
+                }
                 sh 'npm publish --dry-run --access public'
             }
         }
