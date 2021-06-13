@@ -37,7 +37,12 @@ pipeline {
                 sh 'git config user.email "jenkins@curium.rocks"'
                 sh 'git config user.name "Jenkins"'
                 sh 'npm version prerelease --preid=alpha'
-                sh 'git push origin HEAD:development'
+                sh 'git config credential.helper "/bin/bash ' + env.WORKSPACE + '/scripts/git-cred-helper.sh"'
+                withCredentials([usernamePassword(credentialsId: '8f3d53bd-754f-4df3-bc87-59ce5ba6e63e',
+                                 usernameVariable: 'GIT_USERNAME',
+                                 passwordVariable: 'GIT_PASSWORD')]){
+                    sh 'git push origin HEAD:development'
+                }
                 sh 'npm publish --dry-run --access public'
             }
         }

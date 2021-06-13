@@ -5,3 +5,4 @@ ci-pod-template.yaml
 Jenkinsfile
 renovate.json
 tsconfig.json
+scripts
