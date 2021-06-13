@@ -3,6 +3,7 @@ pipeline {
     kubernetes {
       // pod definition that contains env vars, secrets, containers etc needed for building and deploying
       yamlFile 'ci-pod-template.yaml'
+
     }
   }
   stages {
@@ -14,24 +15,29 @@ pipeline {
     //always run
     stage('Build') {
         steps {
-            // install dependencies
-            sh 'npm ci'
-            // compile typescript to js and create map files
-            sh 'npm run build'
-            sh 'npm test'              // lint
-            sh 'npm run lint'
-            // check for vulnerabilities
-            sh 'npm audit --production'
-            sh 'npm run sonarscan'
+            container('node-build') {
+                // install dependencies
+                sh 'npm ci'
+                // compile typescript to js and create map files
+                sh 'npm run build'
+                sh 'npm test'              // lint
+                sh 'npm run lint'
+                // check for vulnerabilities
+                sh 'npm audit --production'
+                sh 'npm run sonarscan'
+            }
         }
     }
     stage('Publish Prerelease') {
-        when {
+        /*when {
             branch 'development'
-        }
+        }*/
         steps {
-            sh 'npm version prerelease --preid=alpha'
-            sh 'npm publish --dry-run --access public'
+            container('node-build') {
+                sh 'npm version prerelease --preid=alpha'
+                sh 'git push'
+                sh 'npm publish --dry-run --access public'
+            }
         }
     }
     stage('Publish') {
@@ -39,8 +45,10 @@ pipeline {
             branch 'master'
         }
         steps {
-            sh 'npm version major'
-            sh 'npm publish --dry-run --access public'
+            container('node-build') {
+                sh 'npm version major'
+                sh 'npm publish --dry-run --access public'
+            }
         }
     }
   }
