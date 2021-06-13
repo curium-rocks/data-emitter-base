@@ -37,7 +37,7 @@ pipeline {
                 sh 'git config user.email "jenkins@curium.rocks"'
                 sh 'git config user.name "Jenkins"'
                 sh 'npm version prerelease --preid=alpha'
-                sh 'git push'
+                sh 'git push origin HEAD:development'
                 sh 'npm publish --dry-run --access public'
             }
         }
