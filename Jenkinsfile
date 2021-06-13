@@ -34,8 +34,8 @@ pipeline {
         }*/
         steps {
             container('node-build') {
-                sh 'git config --global user.email "jenkins@curium.rocks"'
-                sh 'git config --global user.name "Jenkins"'
+                sh 'git config user.email "jenkins@curium.rocks"'
+                sh 'git config user.name "Jenkins"'
                 sh 'npm version prerelease --preid=alpha'
                 sh 'git push'
                 sh 'npm publish --dry-run --access public'
