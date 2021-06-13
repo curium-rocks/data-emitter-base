@@ -20,6 +20,11 @@ spec:
         secretKeyRef:
           name: sonarpwd
           key: password
+    - name: NODE_ACCESS_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: npm
+          key: accesstoken
     - name: SONAR_QUBE_HOST_NAME
       valueFrom:
         secretKeyRef:

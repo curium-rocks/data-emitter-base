@@ -14,18 +14,33 @@ pipeline {
     //always run
     stage('Build') {
         steps {
-            container('node-build') {
-              // install dependencies
-              sh 'npm ci'
-              // compile typescript to js and create map files
-              sh 'npm run build'
-              sh 'npm test'              // lint
-              sh 'npm run lint'
-              // check for vulnerabilities
-              sh 'npm audit --production'
-              sh 'npm run sonarscan'
-              // publish
-            }
+            // install dependencies
+            sh 'npm ci'
+            // compile typescript to js and create map files
+            sh 'npm run build'
+            sh 'npm test'              // lint
+            sh 'npm run lint'
+            // check for vulnerabilities
+            sh 'npm audit --production'
+            sh 'npm run sonarscan'
+        }
+    }
+    stage('Publish Prerelease') {
+        when {
+            branch 'development'
+        }
+        steps {
+            sh 'npm version prerelease --preid=alpha'
+            sh 'npm publish --dry-run --access public'
+        }
+    }
+    stage('Publish') {
+        when {
+            branch 'master'
+        }
+        steps {
+            sh 'npm version major'
+            sh 'npm publish --dry-run --access public'
         }
     }
   }
