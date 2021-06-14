@@ -50,7 +50,7 @@ pipeline {
                                  passwordVariable: 'GIT_PASSWORD')]){
                     sh 'git push origin HEAD:development'
                 }
-                sh 'npm publish --dry-run --access public'
+                sh 'npm publish --access public'
             }
         }
     }
