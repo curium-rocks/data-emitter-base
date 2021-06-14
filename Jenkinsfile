@@ -3,8 +3,10 @@ pipeline {
     kubernetes {
       // pod definition that contains env vars, secrets, containers etc needed for building and deploying
       yamlFile 'ci-pod-template.yaml'
-
     }
+  }
+  environment {
+    AUTHOR_NAME = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%an'").trim()
   }
   stages {
     stage('Notify') {
@@ -16,6 +18,7 @@ pipeline {
     stage('Build') {
         steps {
             container('node-build') {
+                sh 'printenv'
                 // install dependencies
                 sh 'npm ci'
                 // compile typescript to js and create map files
@@ -33,7 +36,7 @@ pipeline {
             allOf {
                 branch 'development'
                 not {
-                    expression { env.CHANGE_AUTHOR.contains('Jenkins') }
+                    expression { env.AUTHOR_NAME.contains('Jenkins') }
                 }
             }
         }
@@ -57,7 +60,7 @@ pipeline {
             allOf {
                 branch 'master'
                 not {
-                    expression { env.CHANGE_AUTHOR.contains('Jenkins') }
+                    expression { env.AUTHOR_NAME.contains('Jenkins') }
                 }
             }
         }
