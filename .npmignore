@@ -6,3 +6,7 @@ Jenkinsfile
 renovate.json
 tsconfig.json
 scripts
+.nyc_output
+coverage
+.scannerwork
+test

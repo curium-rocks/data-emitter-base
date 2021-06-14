@@ -18,7 +18,6 @@ pipeline {
     stage('Build') {
         steps {
             container('node-build') {
-                sh 'printenv'
                 // install dependencies
                 sh 'npm ci'
                 // compile typescript to js and create map files
