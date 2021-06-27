@@ -126,7 +126,7 @@ describe( 'PollingEmitter', async ()=> {
             pollingEmitter.applySettings({
                 id: 'new-test',
                 name: 'new-name',
-                commLink: 'new-link',
+                description: 'new-link',
                 actionId: '2',
                 additional: {},
                 interval: 100
@@ -134,7 +134,7 @@ describe( 'PollingEmitter', async ()=> {
                 expect(res.actionId).to.be.eq('2');
                 expect(res.success).to.be.true;
                 expect(res.failureReason).to.be.undefined;
-                expect(pollingEmitter.commLinkDesc).to.be.eq('new-link');
+                expect(pollingEmitter.description).to.be.eq('new-link');
                 expect(pollingEmitter.name).to.be.eq('new-name');
                 expect(pollingEmitter.id).to.be.eq('new-test');
                 done();

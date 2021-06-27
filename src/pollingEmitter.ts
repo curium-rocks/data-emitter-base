@@ -11,7 +11,7 @@ export interface IPollingSettings {
  */
 export abstract class PollingEmitter extends BaseEmitter {
 
-    protected _intervalTimer?: number;
+    protected _intervalTimer?: NodeJS.Timeout;
     protected _lastDataEvent?: IDataEvent;
     protected _lastStatusEvent?: IStatusEvent;
 
@@ -80,10 +80,9 @@ export abstract class PollingEmitter extends BaseEmitter {
      * @param {ISettings} settings 
      * @return {Promise<IExecutionResult>}
      */
-    public applySettings(settings: ISettings & ITraceableAction & IPollingSettings): Promise<IExecutionResult> {
-        this.setName(settings.name); 
-        this.setId(settings.id);
-        this.setCommLink(settings.commLink);
+    public async applySettings(settings: ISettings & ITraceableAction & IPollingSettings): Promise<IExecutionResult> {
+        const result = await super.applySettings(settings);
+        if(!result.success) return result;
         this._interval = settings.interval;
         this.startPolling();
         return Promise.resolve({

@@ -1,4 +1,4 @@
-import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDisposable, IExecutionResult, ISettings, IStatusChangeListener, IStatusEvent, ITraceableAction } from "./dataEmitter";
+import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDataEventListenerFunc, IDisposable, IExecutionResult, ISettings, IStatusChangeListener, IStatusChangeListenerFunc, IStatusEvent, ITraceableAction } from "./dataEmitter";
 
 /**
  * Abstract base class emitter that takes care of managing registrations of
@@ -28,7 +28,7 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * DC check interval handle
      * @private
      */
-    private _dcInterval?: number;
+    private _dcInterval?: NodeJS.Timeout;
 
     /**
      * amount of time between dc checks
@@ -66,8 +66,8 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
     /**
      * @return {string} communication link description
      */
-    public get commLinkDesc():string {
-        return this._commLinkDesc;
+    public get description():string {
+        return this._description;
     }
 
 
@@ -75,9 +75,9 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * 
      * @param {string} _id 
      * @param {string} _name 
-     * @param {string} _commLinkDesc 
+     * @param {string} _description 
      */
-    constructor(private _id: string, private _name: string, private _commLinkDesc: string) {}
+    constructor(private _id: string, private _name: string, private _description: string) {}
 
     /**
      * 
@@ -94,14 +94,15 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * @param {IDataEventListener} listener 
      * @return {IDisposable} 
      */
-    onData(listener: IDataEventListener): IDisposable {
+    onData(listener: IDataEventListener|IDataEventListenerFunc): IDisposable {
+        if(typeof listener == 'function') listener = this.wrapDataListener(listener);
         this._dataListeners.add(listener);
         return {
             /**
              * remove the listener from the set
              */
             dispose: () => {
-                this._dataListeners.delete(listener);
+                this._dataListeners.delete(listener as IDataEventListener);
             }
         }
     }
@@ -126,18 +127,40 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
 
     /**
      * 
-     * @param {string} commLink 
+     * @param {string} description 
      */
-    protected setCommLink(commLink: string) : void {
-        this._commLinkDesc = commLink;
+    protected setDescription(description: string) : void {
+        this._description = description;
     }
 
     /**
-     * 
+     * Set the unique identifier for the emitter
      * @param {string} id 
      */
     protected setId(id: string) : void {
         this._id = id;
+    }
+    /**
+     * Takes a simple function listener parameter and turns it into the listener interface
+     * format
+     * @param {IStatusChangeListenerFunc} listener 
+     * @return {IStatusChangeListener} 
+     */
+    protected wrapStatusListener(listener:IStatusChangeListenerFunc): IStatusChangeListener {
+        return {
+            onStatus: listener
+        }
+    }
+
+    /**
+     * Wrap a data listener function into a {IDataEventListener}
+     * @param {IDataEventListenerFunc} listener 
+     * @return {IDataEventListener}
+     */
+    protected wrapDataListener(listener:IDataEventListenerFunc): IDataEventListener {
+        return {
+            onData: listener
+        }
     }
 
     /**
@@ -145,11 +168,12 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * @param {IStatusChangeListener} listener 
      * @return {IDisposable} 
      */
-    onStatus(listener: IStatusChangeListener): IDisposable {
+    onStatus(listener: IStatusChangeListener|IStatusChangeListenerFunc): IDisposable {
+        if(typeof listener == 'function') listener = this.wrapStatusListener(listener);
         this._statusListeners.add(listener);
         return {
             dispose: () => {
-                this._statusListeners.delete(listener);
+                this._statusListeners.delete(listener as IStatusChangeListener);
             }
         }
     }
@@ -195,7 +219,7 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
     }
 
     /**
-     * 
+     * build a status event
      * @return {IStatusEvent} 
      */
     protected buildStatusEvent(): IStatusEvent {
@@ -251,36 +275,57 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
     }
     
     /**
-     * 
+     * Apply settings to the emitter, this could be emitter settings
+     * such as poll intervel, d/c threshold, or use the additional 
+     * property to apply settings to the underlying source
      * @param {ISettings} settings 
-     * @return {Promise<ITraceableAction}
+     * @return {Promise<IExecutionResul>}
      */
-    abstract applySettings(settings: ISettings & ITraceableAction): Promise<IExecutionResult>;
-    
+    public applySettings(settings: ISettings & ITraceableAction): Promise<IExecutionResult> {
+        this.setName(settings.name); 
+        this.setId(settings.id);
+        this.setDescription(settings.description);
+        return Promise.resolve({
+            actionId: settings.actionId,
+            success: true
+        })
+    }
+
     /**
-     * 
+     * Send a command to the emitter, this could change emitter behavior,
+     * write something directly the unlderying source etc.
      * @param {ITraceableAction} command
      * @return {Promise<IExecutionResult>} 
      */
     abstract sendCommand(command: ICommand): Promise<IExecutionResult>;
 
     /**
+     * Fetch the latest state information such as connectivity
+     * from the emitter, this could be cached from last event emission or generated
+     * each time
      * @return {Promise<ITraceableAction>} 
      */
     abstract probeStatus(): Promise<IStatusEvent>;
     
     /**
+     * Probe the current data, this could return the
+     * last emitted data for event based streams,
+     * or actually trigger fetching the latest from the 
+     * source
      * @return {Promise<IDataEvent>}
      */
     abstract probeCurrentData(): Promise<IDataEvent>;
 
     /**
+     * Get meta data associated with this emitter, this varies
+     * per emitter implementation
      * @return {unknown}
      */
     abstract getMetaData(): unknown;
 
     /**
-     * Cleanup any resources/timers
+     * Cleanup any resources/timers managed by the 
+     * emitter
      */
     dispose(): void {
         if(this._dcInterval) clearInterval(this._dcInterval);

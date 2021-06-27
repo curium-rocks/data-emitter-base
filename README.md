@@ -1,4 +1,6 @@
 # data-emitter-base
+[![Coverage](https://sonarqube.curium.rocks/api/project_badges/measure?project=data-emitter-base&metric=coverage)](https://sonarqube.curium.rocks/dashboard?id=data-emitter-base) [![Security Rating](https://sonarqube.curium.rocks/api/project_badges/measure?project=data-emitter-base&metric=security_rating)](https://sonarqube.curium.rocks/dashboard?id=data-emitter-base)
+
 Contains a set of base classes and interfaces to minimize
 boilerplate code when integrating data sources.
 

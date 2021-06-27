@@ -27,6 +27,7 @@ pipeline {
                 // check for vulnerabilities
                 sh 'npm audit --production'
                 sh 'npm run sonarscan'
+                sh 'npm run doc'
             }
         }
     }
@@ -68,7 +69,7 @@ pipeline {
             container('node-build') {
                 sh 'git config --global user.email "jenkins@curium.rocks"'
                 sh 'git config --global user.name "Jenkins"'
-                sh 'npm version major'
+                sh 'npm version minor'
                 sh 'git config credential.helper "/bin/bash ' + env.WORKSPACE + '/scripts/git-cred-helper.sh"'
                 withCredentials([usernamePassword(credentialsId: '8f3d53bd-754f-4df3-bc87-59ce5ba6e63e',
                                  usernameVariable: 'GIT_USERNAME',
@@ -76,7 +77,7 @@ pipeline {
                     sh 'git push origin HEAD:master'
                 }
                 sh 'npm config set //registry.npmjs.org/:_authToken ${NODE_ACCESS_TOKEN}'
-                sh 'npm publish --dry-run --access public'
+                sh 'npm publish -access public'
             }
         }
     }
@@ -87,6 +88,9 @@ pipeline {
     }
     success{
        mattermostSend color: "good", message: "[Data-Emitter-Interfaces] Build Success - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+    }
+    always {
+       archiveArtifacts artifacts: 'build/**/*,coverage/**/*,docs/**/*', fingerprint: true
     }
   }
 }

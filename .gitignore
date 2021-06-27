@@ -3,3 +3,5 @@ build
 .nyc_output
 coverage
 .idea
+docs
+.DS_Store
