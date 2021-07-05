@@ -1,6 +1,7 @@
 import { describe, it} from 'mocha';
 import { expect } from 'chai';
-import { TestPollingEmitter } from './helpers/testPollingEmitter';
+import { TestDeltaPollingEmitter, TestPollingEmitter } from './helpers/testPollingEmitter';
+import { assert } from 'console';
 
 
 describe( 'PollingEmitter', async ()=> {
@@ -179,3 +180,48 @@ describe( 'PollingEmitter', async ()=> {
         })
     })
 });
+
+describe('DeltaPollingEmitter',  function() {
+    describe('onData', function() {
+        const pollingEmitter = new TestDeltaPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100);
+        before(()=>{
+            pollingEmitter.startPolling();
+        })
+        after(()=>{
+            pollingEmitter.stopPolling();
+            pollingEmitter.dispose();
+        });
+        it('should not emit without change', function(done) {
+            pollingEmitter.setHasChanged(false);
+            const timeout = setTimeout(()=>{
+                disposable.dispose();
+                done();
+                clearTimeout(timeout);
+            },500);
+            const disposable = pollingEmitter.onData({
+                onData: (dataEvent) => {
+                    expect(true).to.be.false("Should not have received data");
+                    done();
+                    clearTimeout(timeout);
+                }
+            });
+        });
+        it( 'Should emit when changed', (done) => {
+            pollingEmitter.setHasChanged(true);
+            pollingEmitter.setData("test");
+            const timeout = setTimeout(()=>{
+                expect(false, "timeout").to.be.eq(true);
+                disposable.dispose();
+                done();
+            },500);
+            const disposable = pollingEmitter.onData({
+                onData: (dataEvent) => {
+                    expect(dataEvent).to.not.be.null;
+                    expect(dataEvent.data).to.be.eq('test')
+                    clearTimeout(timeout);
+                    done();
+                }
+            });
+        });
+    })
+})

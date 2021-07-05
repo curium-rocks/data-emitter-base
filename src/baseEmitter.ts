@@ -28,7 +28,7 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * DC check interval handle
      * @private
      */
-    private _dcInterval?: NodeJS.Timeout;
+    private _dcInterval?: ReturnType<typeof setInterval>;
 
     /**
      * amount of time between dc checks

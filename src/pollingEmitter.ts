@@ -11,7 +11,7 @@ export interface IPollingSettings {
  */
 export abstract class PollingEmitter extends BaseEmitter {
 
-    protected _intervalTimer?: NodeJS.Timeout;
+    protected _intervalTimer?: ReturnType<typeof setInterval>;
     protected _lastDataEvent?: IDataEvent;
     protected _lastStatusEvent?: IStatusEvent;
 
@@ -95,4 +95,35 @@ export abstract class PollingEmitter extends BaseEmitter {
      * Poll the resource 
      */
     abstract poll(): Promise<unknown>; 
+}
+
+/**
+ * Polls a data source but only emits data events
+ * when the data changes
+ */
+export abstract class DeltaPollingEmitter extends PollingEmitter {
+
+    /**
+     * Execute the poll and emit the result if there has been a change
+     * @return {Promise<void>}
+     */
+     protected pollExecutor(): Promise<void> {
+        return this.poll().then( (res:unknown) => {
+            this.connected();
+            this.clearIfFaulted();
+            const dataEvt = this.buildDataEvent(res);
+            if(this.hasChanged(dataEvt)) {
+                this._lastDataEvent = dataEvt;
+                this.notifyDataListeners(this._lastDataEvent);
+            }
+        }).catch( () => { 
+            this.faulted();
+        });
+    }
+
+    /**
+     * Check if the data event includes changes
+     * @param {IDataEvent} evt 
+     */
+    abstract hasChanged(evt: IDataEvent): boolean;
 }
