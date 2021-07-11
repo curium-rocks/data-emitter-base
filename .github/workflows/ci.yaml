@@ -24,10 +24,21 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONARQUBE_KEY: ${{ secrets.SONARQUBE_KEY }}
     - run: npm run doc
+  echo_github_conds:
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo "ref = ${{github.ref}}, github.event = ${{ toJson(github.event) }}"
   publish:
+    needs: build
     if: ${{ (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/development') && github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16.x
+        cache: 'npm'
     - run: 'git config user.email "git@curium.rocks"'
     - run: 'git config user.name "ci"'
     - if: github.ref == 'refs/heads/development'
