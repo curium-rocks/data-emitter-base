@@ -46,9 +46,9 @@ jobs:
       run: npm version prerelease --preid-alpha
     - if: github.ref == 'refs/heads/master'
       run: npm version minor
-    - if: github.ref == 'refs/head/development'
+    - if: github.ref == 'refs/heads/development'
       run: git push origin HEAD:development
-    - if: github.ref == 'refs/head/master'
+    - if: github.ref == 'refs/heads/master'
       run: git push origin HEAD:master
     - run: npm config set //registry.npmjs.org/:_authToken ${NODE_ACCESS_TOKEN}
       env:
