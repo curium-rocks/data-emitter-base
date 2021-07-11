@@ -1,6 +1,8 @@
 name: DataEmitter CI
 on:
   push:
+env:
+  SONARQUBE_KEY: ${{ secrets.SONARQUBE_KEY }}
 jobs:
   build:
     runs-on: ubuntu-latest
