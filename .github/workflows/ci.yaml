@@ -24,10 +24,13 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONARQUBE_KEY: ${{ secrets.SONARQUBE_KEY }}
     - run: npm run doc
-  echo_github_conds:
-    runs-on: ubuntu-latest
-    steps:
-    - run: echo "ref = ${{github.ref}}, github.event = ${{ toJson(github.event) }}"
+    - uses: actions/upload-artifact@v2
+      with:
+        name: build-artifacts
+        path: |
+          build/**/*
+          coverage/**/*
+          docs/**/*
   publish:
     needs: build
     if: ${{ (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/development') }}
@@ -53,4 +56,4 @@ jobs:
     - run: npm config set //registry.npmjs.org/:_authToken ${NODE_ACCESS_TOKEN}
       env:
         NODE_ACCESS_TOKEN: ${{ secrets.NODE_ACCESS_TOKEN }}
-    - run: npm publish --access public --dry-run
+    - run: npm publish --access public
