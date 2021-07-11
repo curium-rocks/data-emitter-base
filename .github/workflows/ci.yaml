@@ -24,10 +24,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONARQUBE_KEY: ${{ secrets.SONARQUBE_KEY }}
     - run: npm run doc
-  echo_github_conds:
-    runs-on: ubuntu-latest
-    steps:
-    - run: echo "ref = ${{github.ref}}, github.event = ${{ toJson(github.event) }}"
   publish:
     needs: build
     if: ${{ (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/development') }}
