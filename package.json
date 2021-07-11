@@ -10,11 +10,11 @@
     "clean": "rm -fr build",
     "prepare": "npm run build",
     "doc": "typedoc src/lib.ts",
-    "sonarscan": "sonar-scanner -Dsonar.qualitygate.wait=true -Dsonar.projectKey=data-emitter-base -Dsonar.sources=. -Dsonar.host.url=https://$SONAR_QUBE_HOST_NAME -Dsonar.login=$SONAR_LOGIN -Dsonar.javascript.lcov.reportPath=coverage/"
+    "sonarscan": "sonar-scanner -Dsonar.qualitygate.wait=true -Dsonar.projectKey=curium-rocks_data-emitter-base -Dsonar.sources=. -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONARQUBE_KEY -Dsonar.javascript.lcov.reportPath=coverage/"
   },
   "repository": {
     "type": "git",
-    "url": "https://git.curium.rocks/curium.rocks/data-emitter-base.git"
+    "url": "https://github.com/curium-rocks/data-emitter-base.git"
   },
   "keywords": [
     "data",
