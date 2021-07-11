@@ -24,6 +24,13 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONARQUBE_KEY: ${{ secrets.SONARQUBE_KEY }}
     - run: npm run doc
+    - uses: actions/upload-artifact@v2
+      with:
+        name: build-artifacts
+        path: |
+          build/**/*
+          coverage/**/*
+          docs/**/*
   publish:
     needs: build
     if: ${{ (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/development') }}
