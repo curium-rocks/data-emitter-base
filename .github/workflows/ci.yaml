@@ -39,6 +39,7 @@ jobs:
       with:
         node-version: 16.x
         cache: 'npm'
+    - run: npm ci
     - run: 'git config user.email "git@curium.rocks"'
     - run: 'git config user.name "ci"'
     - if: github.ref == 'refs/heads/development'
