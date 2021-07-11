@@ -25,7 +25,7 @@ jobs:
         SONARQUBE_KEY: ${{ secrets.SONARQUBE_KEY }}
     - run: npm run doc
   publish:
-    if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/development' }}
+    if: ${{ (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/development') && github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
     steps:
     - run: 'git config user.email "git@curium.rocks"'
