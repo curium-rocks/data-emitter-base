@@ -17,9 +17,8 @@ jobs:
     - run: npm run lint
     - run: npm audit --production
     - run: npm run build
-    - run: npm test
-    - name: sonarscan
-      run: npm run sonarscan
+    - name: test
+      run: npm run test && npm run sonarscan
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONARQUBE_KEY: ${{ secrets.SONARQUBE_KEY }}
