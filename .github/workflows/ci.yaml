@@ -27,7 +27,7 @@ jobs:
   echo_github_conds:
     runs-on: ubuntu-latest
     steps:
-    - run: echo "ref = ${{github.ref}}, github.event = ${{github.event}}"
+    - run: echo "ref = ${{github.ref}}, github.event = ${{ toJson(github.event.pull_request.merged) }}"
   publish:
     needs: build
     if: ${{ (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/development') && github.event.pull_request.merged == true }}
