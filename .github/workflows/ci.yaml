@@ -1,8 +1,6 @@
 name: DataEmitter CI
 on:
   push:
-env:
-  SONARQUBE_KEY: ${{ secrets.SONARQUBE_KEY }}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,5 +16,9 @@ jobs:
     - run: npm audit --production
     - run: npm run build
     - run: npm test
-    - run: npm run sonarscan
+    - name: sonarscan
+      run: npm run sonarscan
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONARQUBE_KEY: ${{ secrets.SONARQUBE_KEY }}
     - run: npm run doc
