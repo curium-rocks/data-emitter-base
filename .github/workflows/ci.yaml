@@ -18,7 +18,8 @@ jobs:
     - run: npm audit --production
     - run: npm run build
     - run: npm run test
-    - name: qube scan
+    - if: ${{ github.actor != 'dependabot[bot]' }}
+      name: qube scan
       run: npm run sonarscan
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
