@@ -2,11 +2,19 @@ import { describe, it} from 'mocha';
 import { expect } from 'chai';
 import { TestDeltaPollingEmitter, TestPollingEmitter } from './helpers/testPollingEmitter';
 import { assert } from 'console';
+import { TestLogger } from './helpers/testLogger';
 
+const logger = new TestLogger();
+
+const sleep = (sleepMs:number) : Promise<void> => {
+    return new Promise((resolve)=>{
+        setTimeout(resolve, sleepMs);
+    });
+}
 
 describe( 'PollingEmitter', async ()=> {
     describe( 'onData', async () => {
-        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100);
+        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
         before(()=>{
             pollingEmitter.startPolling();
         })
@@ -32,7 +40,7 @@ describe( 'PollingEmitter', async ()=> {
         });
     })
     describe('onStatus', async () => {
-        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100);
+        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
         before(()=>{
             pollingEmitter.startPolling();
         })
@@ -65,8 +73,7 @@ describe( 'PollingEmitter', async ()=> {
             }, 500)
             let flipped = false;
             let evts = 0;
-            const disposable = pollingEmitter.onStatus({
-                onStatus: (evt) => {
+            const disposable = pollingEmitter.onStatus((evt) => {
                     if(flipped) {
                         expect(evt.bit, "expecting fault").to.be.false;
                     } else {
@@ -81,7 +88,7 @@ describe( 'PollingEmitter', async ()=> {
                         done();
                     }
                 }
-            });
+            );
         })
         it('Should send event on connection changes',(done) => {
             pollingEmitter.stopPolling();
@@ -115,7 +122,7 @@ describe( 'PollingEmitter', async ()=> {
         })
     })
     describe('applySettings', async () => {
-        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100);
+        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
         before(()=>{
             pollingEmitter.startPolling();
         })
@@ -143,7 +150,7 @@ describe( 'PollingEmitter', async ()=> {
         });
     })
     describe('probeStatus', async() => {
-        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100);
+        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
         before(()=>{
             pollingEmitter.startPolling();
         })
@@ -161,7 +168,7 @@ describe( 'PollingEmitter', async ()=> {
         })
     })
     describe('probeCurrentData', async() => {
-        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100);
+        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
         before(()=>{
             pollingEmitter.startPolling();
         })
@@ -179,11 +186,66 @@ describe( 'PollingEmitter', async ()=> {
             expect(data.timestamp).to.not.be.null;
         })
     })
+    describe('startPolling', function() {
+        it('Start emitting data events', async function() {
+            const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
+            let emitCount = 0;
+            const disposable = pollingEmitter.onData((dataEvt)=>{
+                emitCount++;
+            })
+            await sleep(300);
+            expect(emitCount).to.be.eq(0);
+            pollingEmitter.startPolling();
+            await sleep(300);
+            expect(emitCount).to.be.greaterThan(0);
+            pollingEmitter.dispose();
+            disposable.dispose();
+        })
+    })
+    describe('stopPolling', function(){
+        it('Should stop timers emitting data', async function() {
+            const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
+            let emitCount = 0;
+            const disposable = pollingEmitter.onData((dataEvt)=>{
+                emitCount++;
+            })
+            pollingEmitter.startPolling();
+            await sleep(300);
+            expect(emitCount).to.be.greaterThan(0);
+            pollingEmitter.stopPolling();
+            emitCount = 0;
+            await sleep(300);
+            expect(emitCount).to.be.eq(0);
+            pollingEmitter.dispose();
+            disposable.dispose();
+        })
+    })
+    describe('dispose', function(){
+        it('Should clean up any timers', async function() {
+            const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
+            let emitCount = 0;
+            const onDataListener = pollingEmitter.onData((dataEvt)=>{
+                emitCount++;
+            })
+            const onStatusListener = pollingEmitter.onStatus((statusEvt)=>{
+                emitCount++;
+            })
+            pollingEmitter.startPolling();
+            await sleep(300);
+            expect(emitCount).to.be.greaterThan(0);
+            pollingEmitter.dispose();
+            emitCount = 0;
+            await sleep(300);
+            expect(emitCount).to.be.eq(0);
+            onDataListener.dispose();
+            onStatusListener.dispose();
+        })
+    })
 });
 
 describe('DeltaPollingEmitter',  function() {
     describe('onData', function() {
-        const pollingEmitter = new TestDeltaPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100);
+        const pollingEmitter = new TestDeltaPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
         before(()=>{
             pollingEmitter.startPolling();
         })
