@@ -107,7 +107,16 @@ export abstract class PollingEmitter extends BaseEmitter {
     /**
      * Poll the resource 
      */
-    abstract poll(): Promise<unknown>; 
+    abstract poll(): Promise<unknown>;
+
+    /**
+     * Clean up timers used for polling
+     */
+    public override dispose(): void {
+        this.log(LogLevel.DEBUG, "Disposing");
+        super.dispose();
+        if(this._intervalTimer != null) clearInterval(this._intervalTimer);
+    }
 }
 
 /**
