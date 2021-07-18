@@ -2,11 +2,13 @@ import { describe, it} from 'mocha';
 import { expect } from 'chai';
 import { TestDeltaPollingEmitter, TestPollingEmitter } from './helpers/testPollingEmitter';
 import { assert } from 'console';
+import { TestLogger } from './helpers/testLogger';
 
+const logger = new TestLogger();
 
 describe( 'PollingEmitter', async ()=> {
     describe( 'onData', async () => {
-        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100);
+        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
         before(()=>{
             pollingEmitter.startPolling();
         })
@@ -32,7 +34,7 @@ describe( 'PollingEmitter', async ()=> {
         });
     })
     describe('onStatus', async () => {
-        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100);
+        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
         before(()=>{
             pollingEmitter.startPolling();
         })
@@ -115,7 +117,7 @@ describe( 'PollingEmitter', async ()=> {
         })
     })
     describe('applySettings', async () => {
-        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100);
+        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
         before(()=>{
             pollingEmitter.startPolling();
         })
@@ -143,7 +145,7 @@ describe( 'PollingEmitter', async ()=> {
         });
     })
     describe('probeStatus', async() => {
-        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100);
+        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
         before(()=>{
             pollingEmitter.startPolling();
         })
@@ -161,7 +163,7 @@ describe( 'PollingEmitter', async ()=> {
         })
     })
     describe('probeCurrentData', async() => {
-        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100);
+        const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
         before(()=>{
             pollingEmitter.startPolling();
         })
@@ -183,7 +185,7 @@ describe( 'PollingEmitter', async ()=> {
 
 describe('DeltaPollingEmitter',  function() {
     describe('onData', function() {
-        const pollingEmitter = new TestDeltaPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100);
+        const pollingEmitter = new TestDeltaPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
         before(()=>{
             pollingEmitter.startPolling();
         })

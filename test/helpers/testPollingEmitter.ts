@@ -6,6 +6,7 @@ import { IExecutionResult, ICommand, IDataEvent } from '../../src/dataEmitter';
  */
 export class TestPollingEmitter extends PollingEmitter {
 
+
     private _shouldFault = false;
 
     /**
@@ -61,6 +62,14 @@ export class TestPollingEmitter extends PollingEmitter {
      */
     getMetaData(): unknown {
         return "test-meta";
+    }
+
+    /**
+     * Type of emitter
+     * @return {string}
+     */
+    getType(): string {
+        return "TestPollingEmitter";
     }
 
 }
@@ -119,4 +128,11 @@ export class TestDeltaPollingEmitter extends DeltaPollingEmitter  {
         return undefined;
     }
     
+    /**
+     * 
+     * @return {string} 
+     */
+    getType(): string {
+        return "TestDeltaPollingEmitter";
+    }
 }

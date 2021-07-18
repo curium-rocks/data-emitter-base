@@ -1,4 +1,5 @@
 import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDataEventListenerFunc, IDisposable, IExecutionResult, ISettings, IStatusChangeListener, IStatusChangeListenerFunc, IStatusEvent, ITraceableAction } from "./dataEmitter";
+import { LoggerFacade, LogLevel } from "./loggerFacade";
 
 /**
  * Abstract base class emitter that takes care of managing registrations of
@@ -13,6 +14,7 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * Listener collection for status change listeners
      */
     private readonly _statusListeners: Set<IStatusChangeListener> = new Set<IStatusChangeListener>();
+
 
     /**
      * connected state
@@ -76,14 +78,18 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * @param {string} _id 
      * @param {string} _name 
      * @param {string} _description 
+     * @param {LoggerFacade|undefined} _logger 
      */
-    constructor(private _id: string, private _name: string, private _description: string) {}
+    constructor(private _id: string, private _name: string, private _description: string, protected _logger:LoggerFacade|undefined = undefined) {
+        this.log(LogLevel.DEBUG, "Creating BaseEmitter");
+    }
 
     /**
      * 
      * @param {IDataEvent} evt 
      */
     protected notifyDataListeners(evt:IDataEvent): void {
+        this.log(LogLevel.TRACE, "Notifying data listeners");
         this._dataListeners.forEach((listener)=>{
             listener.onData(evt);
         })
@@ -95,6 +101,7 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * @return {IDisposable} 
      */
     onData(listener: IDataEventListener|IDataEventListenerFunc): IDisposable {
+        this.log(LogLevel.DEBUG, "adding data listener");
         if(typeof listener == 'function') listener = this.wrapDataListener(listener);
         this._dataListeners.add(listener);
         return {
@@ -102,6 +109,7 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
              * remove the listener from the set
              */
             dispose: () => {
+                this.log(LogLevel.DEBUG, "Removing data listener");
                 this._dataListeners.delete(listener as IDataEventListener);
             }
         }
@@ -112,6 +120,7 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * @param {IStatusEvent} evt 
      */
     protected notifyStatusListeners(evt: IStatusEvent) : void  {
+        this.log(LogLevel.DEBUG, `Notifying ${this._statusListeners.size} listeners of a status change`)
         this._statusListeners.forEach( (listener) => {
             listener.onStatus(evt);
         })
@@ -169,10 +178,12 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * @return {IDisposable} 
      */
     onStatus(listener: IStatusChangeListener|IStatusChangeListenerFunc): IDisposable {
+        this.log(LogLevel.DEBUG, "Adding status listener");
         if(typeof listener == 'function') listener = this.wrapStatusListener(listener);
         this._statusListeners.add(listener);
         return {
             dispose: () => {
+                this.log(LogLevel.DEBUG, "Removing status listener");
                 this._statusListeners.delete(listener as IStatusChangeListener);
             }
         }
@@ -251,7 +262,8 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * @protected
      */
     protected setDCCheckInterval(checkInterval:number, threshold: number): void {
-        if(this._dcInterval) clearInterval(this._dcInterval);
+        this.log(LogLevel.DEBUG, `setting the d/c check interval to ${checkInterval}ms with a threshold of ${threshold}ms`);
+        if(this._dcInterval != null) clearInterval(this._dcInterval);
         this._dcIntervalms = checkInterval;
         this._dcThresholdMs = threshold;
         this._dcInterval = setInterval(this.dcHandler.bind(this), this._dcIntervalms);
@@ -262,7 +274,9 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * @private
      */
     private dcHandler(): void {
+        this._logger?.debug('checking if emitter is disconnected');
         if(this._dcLastHeardTime == null) {
+            this.log(LogLevel.DEBUG, 'no message from emitter yet, marking disconnected');
             this.disconnected();
             return;
         }
@@ -270,6 +284,7 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
         const last = this._dcLastHeardTime;
         const delta = now.getMilliseconds() - last.getMilliseconds();
         if(delta > this._dcThresholdMs) {
+            this.log(LogLevel.DEBUG, `it has been ${delta}ms since we last heard from emitter, marking disconnected`);
             this.disconnected();
         }
     }
@@ -282,6 +297,7 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * @return {Promise<IExecutionResul>}
      */
     public applySettings(settings: ISettings & ITraceableAction): Promise<IExecutionResult> {
+        this.log(LogLevel.DEBUG, "Applying Settings");
         this.setName(settings.name); 
         this.setId(settings.id);
         this.setDescription(settings.description);
@@ -289,6 +305,40 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
             actionId: settings.actionId,
             success: true
         })
+    }
+
+    /**
+     * Prefix a log message with information about the emitter
+     * @param {string} msg 
+     * @return {string} 
+     */
+    protected prefixLogMessage(msg: string) : string {
+        return `${this.getType()}|${this.name}|${this.id}| ${msg}`;
+    }
+
+    /** 
+     * Log information
+     * @param {LogLevel} level 
+     * @param {String} msg 
+     * @return {void}
+     */
+    protected log(level: LogLevel, msg: string) : void {
+        if(this._logger != null) {
+            switch(level) {
+                case LogLevel.TRACE:
+                    return this._logger.trace(this.prefixLogMessage(msg));
+                case LogLevel.DEBUG:
+                    return this._logger.debug(this.prefixLogMessage(msg));
+                case LogLevel.INFO:
+                    return this._logger.info(this.prefixLogMessage(msg));
+                case LogLevel.WARN:
+                    return this._logger.warn(this.prefixLogMessage(msg));
+                case LogLevel.ERROR:
+                    return this._logger.error(this.prefixLogMessage(msg));
+                case LogLevel.CRITICAL:
+                    return this._logger.critical(this.prefixLogMessage(msg));
+            }
+        }
     }
 
     /**
@@ -324,11 +374,17 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
     abstract getMetaData(): unknown;
 
     /**
+     * Get the emitter type for this emitter
+     */
+    abstract getType(): string;
+
+    /**
      * Cleanup any resources/timers managed by the 
      * emitter
      */
     dispose(): void {
-        if(this._dcInterval) clearInterval(this._dcInterval);
+        this.log(LogLevel.DEBUG, "Disposing");
+        if(this._dcInterval != null) clearInterval(this._dcInterval);
         this._dcInterval = undefined;
     }
 
