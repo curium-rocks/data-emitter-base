@@ -2,3 +2,4 @@ export {IDataEmitter, ICompoundDataEmitter, ICommand, IDataEvent, IExecutionResu
 export {BaseEmitter} from './baseEmitter';
 export {PollingEmitter, DeltaPollingEmitter} from './pollingEmitter';
 export {LoggerFacade, LogLevel} from './loggerFacade';
+export {IChronicler, IFileChronicler, IRotatingFileChronicler, IJsonSerializable } from './chronicler';
