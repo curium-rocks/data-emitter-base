@@ -1,3 +1,5 @@
+import { IChronicler } from "./chronicler";
+
 /**
  * A action with a unique identifier, the identifier 
  * should be included in results such as {IExecutionResult}
@@ -179,6 +181,20 @@ export interface IDataEmitter {
      * Probe the latest data for the data source/emitter
      */
     probeCurrentData(): Promise<IDataEvent>;
+
+    /**
+     * Serialize the state of the emitter in a base64 string
+     */
+    serializeState(settings): string;
+}
+
+export interface IFormatSettings {
+    encrypted: boolean;
+    algorithm: string;
+    iv?: string;
+    tag?: string;
+    key?: string;
+    keyName?: string;
 }
 
 /**
@@ -195,4 +211,36 @@ export interface ICompoundDataEmitter extends IDataEmitter {
      * Get the complete list of emitters
      */
     getEmitters(): Array<IDataEmitter>;
+}
+
+export interface IEmitterProvider extends IEmitterFactory {
+    registerEmitterFactory(type: string, factory: IEmitterFactory): void;
+}
+export interface IEmitterFactory {
+    buildEmitter(description:IEmitterDescription) : Promise<IDataEmitter>;
+    recreateEmitter(base64StateData:string): Promise<IDataEmitter>
+}
+
+export interface IChroniclerProvider extends IChroniclerFactory {
+    registerChroniclerFactory(type: string, factory: IChroniclerFactory): void;
+}
+
+export interface IChroniclerFactory {
+    buildChronicler(description:IChroniclerDescription) : Promise<IChronicler>;
+}
+
+export interface IEmitterDescription {
+    emitterProperties: unknown;
+    type: string;
+    name: string;
+    id: string;
+    description: string;
+}
+
+export interface IChroniclerDescription {
+    chroniclerProperties: unknown;
+    type: string;
+    name: string;
+    id: string;
+    description: string;
 }
