@@ -185,7 +185,7 @@ export interface IDataEmitter {
     /**
      * Serialize the state of the emitter in a base64 string
      */
-    serializeState(settings): string;
+    serializeState(settings:IFormatSettings): string;
 }
 
 export interface IFormatSettings {
@@ -218,7 +218,7 @@ export interface IEmitterProvider extends IEmitterFactory {
 }
 export interface IEmitterFactory {
     buildEmitter(description:IEmitterDescription) : Promise<IDataEmitter>;
-    recreateEmitter(base64StateData:string): Promise<IDataEmitter>
+    recreateEmitter(base64StateData:string, formatSettings: IFormatSettings): Promise<IDataEmitter>
 }
 
 export interface IChroniclerProvider extends IChroniclerFactory {

@@ -1,4 +1,4 @@
-import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDataEventListenerFunc, IDisposable, IExecutionResult, ISettings, IStatusChangeListener, IStatusChangeListenerFunc, IStatusEvent, ITraceableAction } from "./dataEmitter";
+import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDataEventListenerFunc, IDisposable, IExecutionResult, IFormatSettings, ISettings, IStatusChangeListener, IStatusChangeListenerFunc, IStatusEvent, ITraceableAction } from "./dataEmitter";
 import { LoggerFacade, LogLevel } from "./loggerFacade";
 
 /**
@@ -82,6 +82,14 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      */
     constructor(private _id: string, private _name: string, private _description: string, protected _logger:LoggerFacade|undefined = undefined) {
         this.log(LogLevel.DEBUG, "Creating BaseEmitter");
+    }
+
+    /**
+     * serialize the important data that is needed to be able to recreate this emitter in it's current state
+     * @param {IFormatSettings} settings used to specify expected format of the serialization
+     */
+    serializeState(settings: IFormatSettings): string {
+        throw new Error("Method not implemented.");
     }
 
     /**
