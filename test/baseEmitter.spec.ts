@@ -33,12 +33,14 @@ describe( 'BaseEmitter', function() {
     describe( 'serializeState()', function() {
         it( 'Should allow plain text serialization', async function() {
             await validateStateRestoration({
-                encrypted: false
+                encrypted: false,
+                type: TestEmitter.TYPE
             });
         });
         it( 'Should allow aes gcm serialization', async function() {
             await validateStateRestoration({
                 encrypted: true,
+                type: TestEmitter.TYPE,
                 algorithm: 'aes-256-gcm',
                 key: 'test123123123',
                 iv: 'adadadada',

@@ -1,10 +1,13 @@
 import { BaseEmitter } from "../../src/baseEmitter";
-import { ICommand, IExecutionResult, IStatusEvent, IDataEvent, IDataEmitter } from "../../src/dataEmitter";
+import { ICommand, IExecutionResult, IStatusEvent, IDataEvent, IDataEmitter, IEmitterFactory, IEmitterDescription, IFormatSettings } from "../../src/dataEmitter";
+import { LoggerFacade } from "../../src/loggerFacade";
+import { ProviderSingleton } from "../../src/provider";
 
 /**
  * 
  */
 export class TestEmitter extends BaseEmitter {
+    public static readonly TYPE = "TEST-EMITTER";
 
     /**
      * 
@@ -25,7 +28,6 @@ export class TestEmitter extends BaseEmitter {
     public metaData: unknown = {
 
     };
-    public type = 'TestEmitter';
 
     /**
      * 
@@ -64,7 +66,44 @@ export class TestEmitter extends BaseEmitter {
      * @return {string}
      */
     getType(): string {
-        return this.type;
+        return TestEmitter.TYPE;
     }
     
 }
+
+/**
+ * 
+ */
+export class TestEmitterFactory implements IEmitterFactory {
+    private _loggerFacade?:LoggerFacade;
+
+    /**
+     * 
+     * @param {IEmitterDescription} description 
+     * @return {Promise<IDataEmitter>}
+     */
+    buildEmitter(description: IEmitterDescription): Promise<IDataEmitter> {
+        return Promise.resolve(new TestEmitter(description.id, description.name, description.description, this._loggerFacade));
+    }
+
+    /**
+     * 
+     * @param {string} base64StateData 
+     * @param {IFormatSettings} formatSettings
+     * @return {Promise<IDataEmitter>} 
+     */
+    recreateEmitter(base64StateData: string, formatSettings: IFormatSettings): Promise<IDataEmitter> {
+        return BaseEmitter.recreateEmitter(base64StateData, formatSettings);
+    }
+
+    /**
+     * 
+     * @param {LoggerFacade} loggerFacade 
+     */
+    setLoggerFacade(loggerFacade: LoggerFacade): void {
+        this._loggerFacade = loggerFacade;
+    }
+
+}
+
+ProviderSingleton.getInstance().registerEmitterFactory(TestEmitter.TYPE, new TestEmitterFactory());

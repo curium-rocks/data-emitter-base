@@ -1,4 +1,5 @@
 import { IChronicler } from "./chronicler";
+import { LoggerFacade } from "./loggerFacade";
 
 /**
  * A action with a unique identifier, the identifier 
@@ -190,6 +191,7 @@ export interface IDataEmitter {
 
 export interface IFormatSettings {
     encrypted: boolean;
+    type: string;
     algorithm?: string;
     iv?: string;
     tag?: string;
@@ -215,18 +217,24 @@ export interface ICompoundDataEmitter extends IDataEmitter {
 
 export interface IEmitterProvider extends IEmitterFactory {
     registerEmitterFactory(type: string, factory: IEmitterFactory): void;
+    hasEmitterFactory(type: string): boolean;
+    getEmitterFactoryTypes(): Array<string>;
 }
 export interface IEmitterFactory {
     buildEmitter(description:IEmitterDescription) : Promise<IDataEmitter>;
-    recreateEmitter(base64StateData:string, formatSettings: IFormatSettings): Promise<IDataEmitter>
+    recreateEmitter(base64StateData:string, formatSettings: IFormatSettings): Promise<IDataEmitter>;
+    setLoggerFacade(loggerFacade: LoggerFacade): void;
 }
 
 export interface IChroniclerProvider extends IChroniclerFactory {
     registerChroniclerFactory(type: string, factory: IChroniclerFactory): void;
+    hasChroniclerFactory(type: string): boolean;
+    getChroniclerFactoryTypes(): Array<string>;
 }
 
 export interface IChroniclerFactory {
     buildChronicler(description:IChroniclerDescription) : Promise<IChronicler>;
+    setLoggerFacade(loggerFacade: LoggerFacade): void;
 }
 
 export interface IEmitterDescription {

@@ -1,5 +1,7 @@
-import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDataEventListenerFunc, IDisposable, IExecutionResult, IFormatSettings, ISettings, IStatusChangeListener, IStatusChangeListenerFunc, IStatusEvent, ITraceableAction } from "./dataEmitter";
+import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDataEventListenerFunc, IDisposable, IEmitterDescription, IEmitterFactory, IExecutionResult, IFormatSettings, ISettings, IStatusChangeListener, IStatusChangeListenerFunc, IStatusEvent, ITraceableAction } from "./dataEmitter";
 import { LoggerFacade, LogLevel } from "./loggerFacade";
+import crypto, { BinaryLike } from 'crypto';
+import { ProviderSingleton } from "./provider";
 
 /**
  * Abstract base class emitter that takes care of managing registrations of
@@ -87,9 +89,51 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
     /**
      * serialize the important data that is needed to be able to recreate this emitter in it's current state
      * @param {IFormatSettings} settings used to specify expected format of the serialization
+     * @return {Promise<string>}
      */
     serializeState(settings: IFormatSettings): Promise<string> {
-        throw new Error("Method not implemented.");
+        if(!settings.encrypted) {
+            return Promise.resolve(JSON.stringify(this.getEmitterDescription()));
+        } else {
+            return BaseEmitter.encrypt(JSON.stringify(this.getEmitterDescription()), settings);
+        }
+    }
+
+    /**
+     * 
+     * @param {string} json 
+     * @param {IFormatSettings} settings 
+     */
+    protected static async encrypt(json:string, settings:IFormatSettings) : Promise<string> {
+        const cipher = crypto.createCipheriv(settings.algorithm as string, settings.key as string, settings.iv as BinaryLike);
+        let cipherText = cipher.update(json, 'utf-8', 'base64');
+        cipherText += cipher.final('base64');
+        return Promise.resolve(cipherText);
+    }
+
+    /**
+     * 
+     * @param {string} base64CipherText
+     * @param {IFormatSettings} settings
+     * @return {Promise<void>}
+     */
+    protected static async decrypt(base64CipherText:string, settings:IFormatSettings): Promise<string> {
+        const decipher = crypto.createDecipheriv(settings.algorithm as string, settings.key as string, settings.iv as BinaryLike);
+        let plainText = decipher.update(base64CipherText, 'base64', 'utf-8');
+        plainText += decipher.final('utf-8');
+        return Promise.resolve(plainText);
+    }
+    
+    /**
+     * Control serialized properties when JSON.stringify is called
+     * @return {unknown}
+     */
+    public toJSON(): unknown {
+        return {
+            name: this.name,
+            description: this.description,
+            id: this.id
+        }
     }
 
     /**
@@ -385,6 +429,46 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * Get the emitter type for this emitter
      */
     abstract getType(): string;
+
+    /**
+     * Gets the emitter description which is used to recreate the emitter
+     * @return {IEmitterDescription}
+     */
+    protected getEmitterDescription(): IEmitterDescription {
+        return {
+            type: this.getType(),
+            name: this.name,
+            description: this.description,
+            id: this.id,
+            emitterProperties: this.getEmitterProperties()
+        }
+    }
+
+    /**
+     * 
+     * @return {unknown} 
+     */
+    protected getEmitterProperties(): unknown {
+        return {};
+    }
+
+    /**
+     * 
+     * @param {string} stateData 
+     * @param {IFormatSettings} settings 
+     */
+    public static async recreateEmitter(stateData: string, settings:IFormatSettings) : Promise<IDataEmitter> {
+        let description:string;
+        if(settings.encrypted) {
+            description = await BaseEmitter.decrypt(stateData, settings);
+        } else {
+            description = stateData;
+        }
+        const emitterDescription:IEmitterDescription = JSON.parse(description) as IEmitterDescription;
+        return ProviderSingleton.getInstance().buildEmitter(emitterDescription);
+    }
+
+
 
     /**
      * Cleanup any resources/timers managed by the 
