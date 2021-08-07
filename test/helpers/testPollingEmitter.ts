@@ -5,8 +5,7 @@ import { IExecutionResult, ICommand, IDataEvent } from '../../src/dataEmitter';
  * Test class for polling emitter
  */
 export class TestPollingEmitter extends PollingEmitter {
-
-
+    public static readonly TYPE = 'TEST-POLLING-EMITTER';
     private _shouldFault = false;
 
     /**
@@ -78,6 +77,7 @@ export class TestPollingEmitter extends PollingEmitter {
  * A test fixture to test the abstract class DeltaPollingEmitter
  */
 export class TestDeltaPollingEmitter extends DeltaPollingEmitter  {
+    public static readonly TYPE = 'TEST-DELTA-POLLING-EMITER';
 
     private changed = false;
     private data: unknown;
@@ -136,3 +136,4 @@ export class TestDeltaPollingEmitter extends DeltaPollingEmitter  {
         return "TestDeltaPollingEmitter";
     }
 }
+

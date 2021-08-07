@@ -1,5 +1,7 @@
-import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDataEventListenerFunc, IDisposable, IExecutionResult, ISettings, IStatusChangeListener, IStatusChangeListenerFunc, IStatusEvent, ITraceableAction } from "./dataEmitter";
+import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDataEventListenerFunc, IDisposable, IEmitterDescription, IExecutionResult, IFormatSettings, ISettings, IStatusChangeListener, IStatusChangeListenerFunc, IStatusEvent, ITraceableAction } from "./dataEmitter";
 import { LoggerFacade, LogLevel } from "./loggerFacade";
+import crypto, { CipherGCMTypes } from 'crypto';
+import { ProviderSingleton } from "./provider";
 
 /**
  * Abstract base class emitter that takes care of managing registrations of
@@ -82,6 +84,74 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      */
     constructor(private _id: string, private _name: string, private _description: string, protected _logger:LoggerFacade|undefined = undefined) {
         this.log(LogLevel.DEBUG, "Creating BaseEmitter");
+    }
+
+    /**
+     * serialize the important data that is needed to be able to recreate this emitter in it's current state
+     * @param {IFormatSettings} settings used to specify expected format of the serialization
+     * @return {Promise<string>}
+     */
+    serializeState(settings: IFormatSettings): Promise<string> {
+        if(!settings.encrypted) {
+            return Promise.resolve(JSON.stringify(this.getEmitterDescription()));
+        } else {
+            return BaseEmitter.encrypt(JSON.stringify(this.getEmitterDescription()), settings);
+        }
+    }
+
+    /**
+     * 
+     * @param {string} json 
+     * @param {IFormatSettings} settings 
+     */
+    protected static async encrypt(json:string, settings:IFormatSettings) : Promise<string> {
+        if((settings.algorithm as string).toLowerCase().indexOf('gcm') != -1) {
+            const gcmCipher = crypto.createCipheriv(settings.algorithm as CipherGCMTypes, Buffer.from(settings.key as string, 'base64'), Buffer.from(settings.iv as string, 'base64'), {
+                authTagLength: 16
+            });
+            const cipherBuffer = Buffer.concat([gcmCipher.update(json, 'utf-8'), gcmCipher.final(), gcmCipher.getAuthTag()]);
+            return Promise.resolve(cipherBuffer.toString('base64'))
+        } else {
+            const cipher = crypto.createCipheriv(settings.algorithm as string, Buffer.from(settings.key as string, 'base64'), Buffer.from(settings.iv as string, 'base64'));
+            const cipherBuffer = Buffer.concat([cipher.update(json, 'utf-8'), cipher.final()]);
+            return Promise.resolve(cipherBuffer.toString('base64'))
+        }
+    }
+
+    /**
+     * 
+     * @param {string} base64CipherText
+     * @param {IFormatSettings} settings
+     * @return {Promise<void>}
+     */
+    protected static async decrypt(base64CipherText:string, settings:IFormatSettings): Promise<string> {
+        if((settings.algorithm as string).toLowerCase().indexOf('gcm') != -1) {
+            const gcmCipher = crypto.createDecipheriv(settings.algorithm as CipherGCMTypes, Buffer.from(settings.key as string, 'base64'), Buffer.from(settings.iv as string, 'base64'))
+            const buffer = Buffer.from(base64CipherText, 'base64');
+            const authTag = buffer.slice(buffer.length-16);
+            const cipher = buffer.slice(0, buffer.length-16);
+            gcmCipher.setAuthTag(authTag);
+            let plainText = gcmCipher.update(cipher, undefined, 'utf-8');
+            plainText += gcmCipher.final('utf-8');
+            return Promise.resolve(plainText);
+        } else {
+            const decipher = crypto.createDecipheriv(settings.algorithm as string, Buffer.from(settings.key as string, 'base64'), Buffer.from(settings.iv as string, 'base64'));
+            let plainText = decipher.update(base64CipherText, 'base64', 'utf-8');
+            plainText += decipher.final('utf-8');
+            return Promise.resolve(plainText);
+        }
+    }
+    
+    /**
+     * Control serialized properties when JSON.stringify is called
+     * @return {unknown}
+     */
+    public toJSON(): unknown {
+        return {
+            name: this.name,
+            description: this.description,
+            id: this.id
+        }
     }
 
     /**
@@ -377,6 +447,46 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * Get the emitter type for this emitter
      */
     abstract getType(): string;
+
+    /**
+     * Gets the emitter description which is used to recreate the emitter
+     * @return {IEmitterDescription}
+     */
+    protected getEmitterDescription(): IEmitterDescription {
+        return {
+            type: this.getType(),
+            name: this.name,
+            description: this.description,
+            id: this.id,
+            emitterProperties: this.getEmitterProperties()
+        }
+    }
+
+    /**
+     * 
+     * @return {unknown} 
+     */
+    protected getEmitterProperties(): unknown {
+        return {};
+    }
+
+    /**
+     * 
+     * @param {string} stateData 
+     * @param {IFormatSettings} settings 
+     */
+    public static async recreateEmitter(stateData: string, settings:IFormatSettings) : Promise<IDataEmitter> {
+        let description:string;
+        if(settings.encrypted) {
+            description = await BaseEmitter.decrypt(stateData, settings);
+        } else {
+            description = stateData;
+        }
+        const emitterDescription:IEmitterDescription = JSON.parse(description) as IEmitterDescription;
+        return ProviderSingleton.getInstance().buildEmitter(emitterDescription);
+    }
+
+
 
     /**
      * Cleanup any resources/timers managed by the 
