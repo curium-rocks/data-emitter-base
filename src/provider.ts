@@ -7,7 +7,7 @@ import { IChroniclerDescription, IChroniclerFactory, IChroniclerProvider, IDataE
  * method to route to the correct factory. Does not support registering 
  * multiple factories with the same type string, last registered takes priority.
  */
-export class Provider implements IChroniclerProvider, IEmitterProvider {
+class Provider implements IChroniclerProvider, IEmitterProvider {
     /**
      * 
      * @param {string} type 
@@ -51,4 +51,25 @@ export class Provider implements IChroniclerProvider, IEmitterProvider {
         throw new Error("Method not implemented.");
     }
     
+}
+
+const provider = new Provider();
+
+/**
+ * Get the provider instance
+ */
+export class ProviderSingleton {
+
+    
+
+    // eslint-disable-next-line require-jsdoc, @typescript-eslint/no-empty-function
+    private constructor() {}
+
+    /**
+     * 
+     * @return {Provider}
+     */
+    public static getInstance(): Provider {
+        return provider;
+    }
 }

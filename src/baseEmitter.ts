@@ -88,7 +88,7 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * serialize the important data that is needed to be able to recreate this emitter in it's current state
      * @param {IFormatSettings} settings used to specify expected format of the serialization
      */
-    serializeState(settings: IFormatSettings): string {
+    serializeState(settings: IFormatSettings): Promise<string> {
         throw new Error("Method not implemented.");
     }
 

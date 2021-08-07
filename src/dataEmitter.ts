@@ -185,12 +185,12 @@ export interface IDataEmitter {
     /**
      * Serialize the state of the emitter in a base64 string
      */
-    serializeState(settings:IFormatSettings): string;
+    serializeState(settings:IFormatSettings): Promise<string>;
 }
 
 export interface IFormatSettings {
     encrypted: boolean;
-    algorithm: string;
+    algorithm?: string;
     iv?: string;
     tag?: string;
     key?: string;
