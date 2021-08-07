@@ -11,8 +11,6 @@ export interface IPollingSettings {
  * to collect information and emit it
  */
 export abstract class PollingEmitter extends BaseEmitter {
-    public static readonly TYPE: "POLLING-EMITTER";
-
     protected _intervalTimer?: ReturnType<typeof setInterval>;
     protected _lastDataEvent?: IDataEvent;
     protected _lastStatusEvent?: IStatusEvent;

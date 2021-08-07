@@ -1,6 +1,6 @@
-import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDataEventListenerFunc, IDisposable, IEmitterDescription, IEmitterFactory, IExecutionResult, IFormatSettings, ISettings, IStatusChangeListener, IStatusChangeListenerFunc, IStatusEvent, ITraceableAction } from "./dataEmitter";
+import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDataEventListenerFunc, IDisposable, IEmitterDescription, IExecutionResult, IFormatSettings, ISettings, IStatusChangeListener, IStatusChangeListenerFunc, IStatusEvent, ITraceableAction } from "./dataEmitter";
 import { LoggerFacade, LogLevel } from "./loggerFacade";
-import crypto, { BinaryLike, CipherGCM, CipherGCMTypes } from 'crypto';
+import crypto, { CipherGCMTypes } from 'crypto';
 import { ProviderSingleton } from "./provider";
 
 /**
