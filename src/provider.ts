@@ -153,7 +153,9 @@ export class ProviderSingleton {
     
 
     // eslint-disable-next-line require-jsdoc, @typescript-eslint/no-empty-function
-    private constructor() {}
+    private constructor() {
+        // This is intentional
+    }
 
     /**
      * 
