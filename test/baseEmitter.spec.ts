@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import { TestEmitter } from './helpers/testEmitter';
 import { IDataEmitter, IFormatSettings } from '../src/dataEmitter';
 import { ProviderSingleton } from '../src/provider';
+import crypto from 'crypto';
 
 /**
  * 
@@ -42,8 +43,8 @@ describe( 'BaseEmitter', function() {
                 encrypted: true,
                 type: TestEmitter.TYPE,
                 algorithm: 'aes-256-gcm',
-                key: 'test123123123',
-                iv: 'adadadada',
+                key: crypto.randomBytes(32).toString('base64'),
+                iv: crypto.randomBytes(32).toString('base64'),
                 tag: 'adadadadad'
             });      
         });

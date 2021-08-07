@@ -1,6 +1,6 @@
 import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDataEventListenerFunc, IDisposable, IEmitterDescription, IEmitterFactory, IExecutionResult, IFormatSettings, ISettings, IStatusChangeListener, IStatusChangeListenerFunc, IStatusEvent, ITraceableAction } from "./dataEmitter";
 import { LoggerFacade, LogLevel } from "./loggerFacade";
-import crypto, { BinaryLike } from 'crypto';
+import crypto, { BinaryLike, CipherGCM, CipherGCMTypes } from 'crypto';
 import { ProviderSingleton } from "./provider";
 
 /**
@@ -105,10 +105,17 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * @param {IFormatSettings} settings 
      */
     protected static async encrypt(json:string, settings:IFormatSettings) : Promise<string> {
-        const cipher = crypto.createCipheriv(settings.algorithm as string, settings.key as string, settings.iv as BinaryLike);
-        let cipherText = cipher.update(json, 'utf-8', 'base64');
-        cipherText += cipher.final('base64');
-        return Promise.resolve(cipherText);
+        if((settings.algorithm as string).toLowerCase().indexOf('gcm') != -1) {
+            const gcmCipher = crypto.createCipheriv(settings.algorithm as CipherGCMTypes, Buffer.from(settings.key as string, 'base64'), Buffer.from(settings.iv as string, 'base64'), {
+                authTagLength: 16
+            });
+            const cipherBuffer = Buffer.concat([gcmCipher.update(json, 'utf-8'), gcmCipher.final(), gcmCipher.getAuthTag()]);
+            return Promise.resolve(cipherBuffer.toString('base64'))
+        } else {
+            const cipher = crypto.createCipheriv(settings.algorithm as string, Buffer.from(settings.key as string, 'base64'), Buffer.from(settings.iv as string, 'base64'));
+            const cipherBuffer = Buffer.concat([cipher.update(json, 'utf-8'), cipher.final()]);
+            return Promise.resolve(cipherBuffer.toString('base64'))
+        }
     }
 
     /**
@@ -118,10 +125,21 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * @return {Promise<void>}
      */
     protected static async decrypt(base64CipherText:string, settings:IFormatSettings): Promise<string> {
-        const decipher = crypto.createDecipheriv(settings.algorithm as string, settings.key as string, settings.iv as BinaryLike);
-        let plainText = decipher.update(base64CipherText, 'base64', 'utf-8');
-        plainText += decipher.final('utf-8');
-        return Promise.resolve(plainText);
+        if((settings.algorithm as string).toLowerCase().indexOf('gcm') != -1) {
+            const gcmCipher = crypto.createDecipheriv(settings.algorithm as CipherGCMTypes, Buffer.from(settings.key as string, 'base64'), Buffer.from(settings.iv as string, 'base64'))
+            const buffer = Buffer.from(base64CipherText, 'base64');
+            const authTag = buffer.slice(buffer.length-16);
+            const cipher = buffer.slice(0, buffer.length-16);
+            gcmCipher.setAuthTag(authTag);
+            let plainText = gcmCipher.update(cipher, undefined, 'utf-8');
+            plainText += gcmCipher.final('utf-8');
+            return Promise.resolve(plainText);
+        } else {
+            const decipher = crypto.createDecipheriv(settings.algorithm as string, Buffer.from(settings.key as string, 'base64'), Buffer.from(settings.iv as string, 'base64'));
+            let plainText = decipher.update(base64CipherText, 'base64', 'utf-8');
+            plainText += decipher.final('utf-8');
+            return Promise.resolve(plainText);
+        }
     }
     
     /**
