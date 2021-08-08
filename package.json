@@ -1,6 +1,6 @@
 {
   "name": "@curium.rocks/data-emitter-base",
-  "version": "0.1.1-alpha.22",
+  "version": "0.1.1-alpha.23",
   "description": "A collection of typescript class interfaces and base classes that specify generic contracts with things that emit data",
   "main": "build/src/lib.js",
   "scripts": {
