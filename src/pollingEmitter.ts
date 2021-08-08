@@ -23,7 +23,7 @@ export abstract class PollingEmitter extends BaseEmitter {
      * @param {number} interval
      * @param {LoggerFacade|undefined} logger
      */
-    constructor(id:string, name: string, desc: string, private _interval: number, logger:LoggerFacade|undefined = undefined){
+    constructor(id:string, name: string, desc: string, protected _interval: number, logger:LoggerFacade|undefined = undefined){
         super(id,name, desc, logger);
         this.log(LogLevel.DEBUG, "Creating PollingEmitter");
     }
