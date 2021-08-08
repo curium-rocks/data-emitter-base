@@ -6,3 +6,4 @@ export {LoggerFacade, LogLevel} from './loggerFacade';
 export {IChronicler, IFileChronicler, IRotatingFileChronicler, IJsonSerializable } from './chronicler';
 export {IService, IChroniclerMaestro, IEmitterMaestro, IMaestro} from './maestro';
 export {ProviderSingleton} from './provider';
+export {BaseFactory, BaseEmitterFactory, BaseChroniclerFactory } from './factory';
