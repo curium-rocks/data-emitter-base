@@ -143,6 +143,7 @@ export interface IDisposable {
  * @return {boolean}
  */
 export function isJsonSerializable(obj:unknown) : boolean {
+    if( obj == null) return false;
     if(typeof obj == 'object') {
         const val = obj as Record<string, unknown>;
         return typeof val.toJSON == 'function';
