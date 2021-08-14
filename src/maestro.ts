@@ -79,16 +79,8 @@ export interface IMaestro extends IEmitterMaestro, IChroniclerMaestro {
      * @param {Iterable<IChronicler>} chroniclers
      * @returns {IDisposable} Disposable link, if disposed cancels the connections
      */
-    connect(emitters:Iterable<IDataEmitter>, chroniclers:Iterable<IChronicler>): IDisposable;
+    connect(emitters:Iterable<IDataEmitter>|IDataEmitter, chroniclers:Iterable<IChronicler>|IChronicler): IDisposable;
 
-    /**
-     * connect the emitter to the chronicler so any emitted data is persisted
-     * to the chronicler
-     * @param {IDataEmitter} emitter
-     * @param {IChronicler} chronicler
-     * @returns {IDisposable} disposable link that when disposed disconnects emitter from chronicler
-     */
-    connect(emitter:IDataEmitter, chronicler:IChronicler): IDisposable;
 
     /**
      * restore the state from the persisted state store
