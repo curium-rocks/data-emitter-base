@@ -1,7 +1,85 @@
-import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDataEventListenerFunc, IDisposable, IEmitterDescription, IExecutionResult, IFormatSettings, ISettings, IStatusChangeListener, IStatusChangeListenerFunc, IStatusEvent, ITraceableAction } from "./dataEmitter";
+import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDataEventListenerFunc, IDisposable, IEmitterDescription, IExecutionResult, IFormatSettings, ISettings, isJsonSerializable, IStatusChangeListener, IStatusChangeListenerFunc, IStatusEvent, ITraceableAction } from "./dataEmitter";
 import { LoggerFacade, LogLevel } from "./loggerFacade";
 import crypto, { CipherGCMTypes } from 'crypto';
 import { ProviderSingleton } from "./provider";
+import { IJsonSerializable } from "./lib";
+
+/**
+ * 
+ */
+export class BaseStatusEvent implements IStatusEvent {
+    connected: boolean;
+    bit: boolean;
+    timestamp: Date;
+
+    /**
+     * 
+     * @param {boolean} connected 
+     * @param {boolean} bit 
+     * @param {Date} timestamp 
+     */
+    constructor(connected: boolean, bit: boolean, timestamp?: Date) {
+        this.connected = connected;
+        this.bit = bit;
+        this.timestamp = timestamp || new Date();
+    }
+
+    /**
+     * @return {Record<string, unknown>}
+     */
+    toJSON(): Record<string, unknown> {
+        return {
+            connected: this.connected,
+            bit: this.bit,
+            timestamp: this.timestamp
+        }
+    }
+    
+}
+
+/**
+ * Create a base data event
+ */
+export class BaseDataEvent implements IDataEvent {
+    readonly emitter: IDataEmitter;
+    readonly timestamp: Date;
+    readonly data: unknown;
+    readonly meta: unknown;
+
+    /**
+     * Create a data event object
+     * @param {IDataEmitter} emitter 
+     * @param {unknown} data 
+     * @param {unknown} meta 
+     */
+    constructor(emitter: IDataEmitter, data: unknown, meta: unknown) {
+        this.emitter = emitter;
+        this.data = data;
+        this.timestamp = new Date();
+        this.meta = meta;
+    }
+
+    /**
+     * Converts the object into a JSON friendly object
+     * @return {Record<string, unknown>}
+     */
+    toJSON(): Record<string, unknown> {
+        const ret = {
+            emitter: this.emitter.toJSON(),
+            timestamp: this.timestamp,
+            data: this.data,
+            meta: this.meta
+        }
+        if(isJsonSerializable(this.data)) {
+            ret.data = (this.data as IJsonSerializable).toJSON();
+        }
+        if(isJsonSerializable(this.meta)) {
+            ret.meta = (this.meta as IJsonSerializable).toJSON();
+        }
+        return ret;
+    }
+    
+}
 
 /**
  * Abstract base class emitter that takes care of managing registrations of
@@ -144,9 +222,9 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
     
     /**
      * Control serialized properties when JSON.stringify is called
-     * @return {unknown}
+     * @return {Record<string, unknown>}
      */
-    public toJSON(): unknown {
+    public toJSON(): Record<string, unknown> {
         return {
             name: this.name,
             description: this.description,
@@ -304,11 +382,7 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * @return {IStatusEvent} 
      */
     protected buildStatusEvent(): IStatusEvent {
-        return {
-            connected: this._connected,
-            timestamp: new Date(),
-            bit: this._faulted
-        }
+        return new BaseStatusEvent(this._connected, this._faulted);
     }
 
     /**
@@ -317,12 +391,7 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * @return {IDataEvent}
      */
     protected buildDataEvent(data: unknown): IDataEvent {
-        return {
-            emitter: this,
-            timestamp: new Date(),
-            data: data,
-            meta: this.getMetaData()
-        }
+        return new BaseDataEvent(this, data, this.getMetaData());
     }
 
     /**

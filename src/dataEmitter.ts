@@ -1,4 +1,4 @@
-import { IChronicler } from "./chronicler";
+import { IChronicler, IJsonSerializable } from "./chronicler";
 import { LoggerFacade } from "./loggerFacade";
 
 /**
@@ -54,7 +54,7 @@ export interface IExecutionResult extends ITraceableAction {
 /**
  * A data emission event
  */
-export interface IDataEvent {
+export interface IDataEvent extends IJsonSerializable {
     /**
      *  Source of the event
      */
@@ -76,7 +76,7 @@ export interface IDataEvent {
 /**
  * A status event, this include information about connection status changes, built in test failures (BIT) etc
  */
-export interface IStatusEvent {
+export interface IStatusEvent extends IJsonSerializable {
     /**
      * source connection state
      */
@@ -136,10 +136,24 @@ export interface IDisposable {
     dispose(): void;
 }
 
+
+/**
+ * 
+ * @param {Record<string, unknown>} obj 
+ * @return {boolean}
+ */
+export function isJsonSerializable(obj:unknown) : boolean {
+    if(typeof obj == 'object') {
+        const val = obj as Record<string, unknown>;
+        return typeof val.toJSON == 'function';
+    }
+    return false;
+}
+
 /**
  * A data source emitter
  */
-export interface IDataEmitter {
+export interface IDataEmitter extends IJsonSerializable {
     /**
      * The unique identifier for the data source/emitter
      */
