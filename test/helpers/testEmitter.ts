@@ -1,4 +1,4 @@
-import { BaseEmitter } from "../../src/baseEmitter";
+import { BaseEmitter, BaseStatusEvent } from "../../src/baseEmitter";
 import { ICommand, IExecutionResult, IStatusEvent, IDataEvent, IDataEmitter, IEmitterDescription } from "../../src/dataEmitter";
 import { ProviderSingleton } from "../../src/provider";
 import { BaseEmitterFactory } from "../../src/factory";
@@ -17,11 +17,7 @@ export class TestEmitter extends BaseEmitter {
         actionId: "n/a"
     };
 
-    public statusEvent: IStatusEvent = {
-        connected: false,
-        bit: true,
-        timestamp: new Date()
-    }
+    public statusEvent: IStatusEvent = new BaseStatusEvent(false, true);
 
     public dataEvent: IDataEvent|undefined;
 

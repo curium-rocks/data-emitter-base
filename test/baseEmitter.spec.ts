@@ -1,7 +1,7 @@
 import { describe, it} from 'mocha';
 import { expect } from 'chai';
 import { TestEmitter } from './helpers/testEmitter';
-import { IDataEmitter, IFormatSettings } from '../src/dataEmitter';
+import { IDataEmitter, IFormatSettings, isJsonSerializable } from '../src/dataEmitter';
 import { ProviderSingleton } from '../src/provider';
 import crypto from 'crypto';
 
@@ -29,8 +29,35 @@ async function validateStateRestoration(formatSettings:IFormatSettings) : Promis
     expect(result).to.not.be.null;
     await validateRecreate(emitter, result, formatSettings);
 }
-
+describe( 'isJSONSerializable()', function() {
+    it( 'Should return false for null', function() {
+        expect(isJsonSerializable(null)).to.be.false;
+    });
+    it( 'Should return false for a string', function() {
+        expect(isJsonSerializable('test')).to.be.false;
+    });
+    it( 'Should be false when toJSON is missing', function() {
+        expect(isJsonSerializable({
+            id: 'adada'
+        })).to.be.false;
+    });
+})
 describe( 'BaseEmitter', function() {
+    describe( 'toJSON()', function() {
+        it( 'Should return something that can be stringified', function() {
+            const emitter = new TestEmitter('test-id', 'test-name', 'test-desc');
+            const serializeSafeObject = emitter.toJSON();
+            const string = JSON.stringify(serializeSafeObject);
+            expect(string).to.not.be.null;
+        });
+        it( 'Should contain the name id and description', function() {
+            const emitter = new TestEmitter('test-id', 'test-name', 'test-desc');
+            const serializeSafeObject = emitter.toJSON();
+            expect(serializeSafeObject.name).to.be.eq(emitter.name);
+            expect(serializeSafeObject.id).to.be.eq(emitter.id);
+            expect(serializeSafeObject.description).to.be.eq(emitter.description);
+        })
+    })
     describe( 'serializeState()', function() {
         it( 'Should allow plain text serialization', async function() {
             await validateStateRestoration({

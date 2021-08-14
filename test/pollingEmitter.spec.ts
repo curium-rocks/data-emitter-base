@@ -1,8 +1,8 @@
 import { describe, it} from 'mocha';
 import { expect } from 'chai';
 import { TestDeltaPollingEmitter, TestPollingEmitter } from './helpers/testPollingEmitter';
-import { assert } from 'console';
 import { TestLogger } from './helpers/testLogger';
+import { IDataEvent, IDisposable } from '../src/dataEmitter';
 
 const logger = new TestLogger();
 
@@ -22,21 +22,37 @@ describe( 'PollingEmitter', async ()=> {
             pollingEmitter.stopPolling();
             pollingEmitter.dispose();
         })
-        it( 'Should provide data', (done) => {
-            const timeout = setTimeout(()=>{
-                expect(false, "timeout").to.be.eq(true);
-                disposable.dispose();
-                done();
-            },500);
+        it( 'Should provide data', async () => {
+            let data:IDataEvent|null = null; 
             const disposable = pollingEmitter.onData({
                 onData: (dataEvent) => {
-                    expect(dataEvent).to.not.be.null;
-                    expect(dataEvent.data).to.be.eq('test')
-                    clearTimeout(timeout);
-                    done();
+                    data = dataEvent;
                 }
             });
-
+            try {
+                await sleep(500);
+                expect(data).to.not.be.null;
+                if(data != null) {
+                    const dataEvent = data as IDataEvent;
+                    expect(dataEvent.data).to.be.eq('test')
+                }
+            } finally {
+                disposable.dispose();
+            }
+        });
+        it( 'Should provide data that can be serialized', async () => {
+            let data:unknown = null;
+            const disposable = pollingEmitter.onData({
+                onData: (dataEvent) => {
+                    data = dataEvent.toJSON();
+                }
+            });
+            try {
+                await sleep(500);
+                expect(data).to.not.be.null;
+            } finally {
+                disposable.dispose();
+            }
         });
     })
     describe('onStatus', async () => {
@@ -56,6 +72,8 @@ describe( 'PollingEmitter', async ()=> {
             const disposable = pollingEmitter.onStatus({
                 onStatus: (evt) => {
                     expect(evt.bit).to.be.true;
+                    const serialized = evt.toJSON();
+                    expect(serialized).to.not.be.null;
                     clearTimeout(timeout);
                     disposable.dispose();
                     done();
@@ -63,7 +81,7 @@ describe( 'PollingEmitter', async ()=> {
             })
             pollingEmitter.setFaulted(true);
 
-        })
+        });
         it('Should send event on clear', (done) => {
 
             pollingEmitter.setFaulted(false);
