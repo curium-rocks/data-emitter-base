@@ -30,6 +30,9 @@ const chroniclerDescription = {
     chroniclerProperties: {}
 }
 const chronicler = {
+    id: 'test',
+    name: 'test-name',
+    description: 'test-description',
     saveRecord: (evt: IJsonSerializable) => {
         return Promise.resolve();
     },
