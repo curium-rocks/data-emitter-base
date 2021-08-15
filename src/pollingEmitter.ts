@@ -1,6 +1,7 @@
 import { BaseEmitter } from "./baseEmitter";
 import { IDataEvent, IExecutionResult, ISettings, IStatusEvent, ITraceableAction } from "./dataEmitter";
 import { LoggerFacade, LogLevel } from "./loggerFacade";
+import { IService } from "./maestro";
 
 export interface IPollingSettings {
     interval: number
@@ -10,7 +11,7 @@ export interface IPollingSettings {
  * A base class that handles the scheduling of a polled fetch
  * to collect information and emit it
  */
-export abstract class PollingEmitter extends BaseEmitter {
+export abstract class PollingEmitter extends BaseEmitter implements IService {
     protected _intervalTimer?: ReturnType<typeof setInterval>;
     protected _lastDataEvent?: IDataEvent;
     protected _lastStatusEvent?: IStatusEvent;
@@ -27,6 +28,7 @@ export abstract class PollingEmitter extends BaseEmitter {
         super(id,name, desc, logger);
         this.log(LogLevel.DEBUG, "Creating PollingEmitter");
     }
+
 
     /**
      * Execute the poll and emit the result
@@ -65,6 +67,25 @@ export abstract class PollingEmitter extends BaseEmitter {
         }
         this._intervalTimer = undefined;
     }
+
+    /**
+     * Start polling
+     * @return {Promise<void>}
+     */
+    start(): Promise<void> {
+        this.startPolling();
+        return Promise.resolve();  
+    }
+
+
+    /**
+     * Stop Polling
+     * @return {Promise<void>}
+     */
+    stop(): Promise<void> {
+        this.stopPolling();
+        return Promise.resolve();   
+     }
 
     /**
      * probe current data
