@@ -136,6 +136,45 @@ export interface IDisposable {
     dispose(): void;
 }
 
+/**
+ * For when a class needs to clean up resources asynchronously
+ */
+export interface IDisposableAsync {
+    disposeAsync(): Promise<void>
+}
+
+/**
+ * 
+ * @param {unknown} obj 
+ * @param {string} methodName 
+ * @return {boolean}
+ */
+export function hasMethod(obj: unknown, methodName: string) : boolean {
+    if(obj == null) return false;
+    if(typeof obj == 'object') {
+        const val = obj as Record<string, unknown>;
+        return typeof val[methodName] == 'function';
+    }
+    return false;
+}
+
+/**
+ * Check if a object implements IDisposableAsync interface
+ * @param {unknown} obj 
+ * @return {boolean}
+ */
+export function isDisposableAsync(obj: unknown) : boolean {
+    return hasMethod(obj, 'disposableAsync');
+}
+
+/**
+ * Checks if an object implements the IDisposable interface
+ * @param {unknown} obj 
+ * @return {boolean} 
+ */
+export function isDisposable(obj: unknown) : boolean {
+    return hasMethod(obj, 'disposable');
+}
 
 /**
  * 
