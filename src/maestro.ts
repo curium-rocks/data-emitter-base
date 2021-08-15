@@ -4,7 +4,8 @@ import {IChronicler} from "./chronicler";
 /**
  * Methods to start and stop a service,
  * this could be inside of a web application
- * or running directly in a process running in systemd
+ * or running directly in a process running in systemd. 
+ * This can also be used for a service inside a program that has a started and stopped state
  */
 export interface IService {
     /**
@@ -19,6 +20,22 @@ export interface IService {
      */
     stop(): Promise<void>;
 }
+
+/**
+ * Check if an object implements IService
+ * @param {unknown} obj
+ * @return {boolean}  
+ */
+export function isService(obj: unknown) : boolean {
+    if (obj == null) return false;
+    if(typeof obj == 'object') {
+        const castedObj = obj as Record<string, unknown>;
+        return typeof castedObj.stop == 'function' && typeof castedObj.start == 'function';
+    }
+    return false;
+}
+
+
 
 /**
  * Maestro of emitters

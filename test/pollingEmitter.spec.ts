@@ -219,6 +219,40 @@ describe( 'PollingEmitter', async ()=> {
             pollingEmitter.dispose();
             disposable.dispose();
         })
+    });
+    describe('start()', function() {
+        it('Should start emitting data events', async function() {
+            const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
+            let emitCount = 0;
+            const disposable = pollingEmitter.onData((dataEvt)=>{
+                emitCount++;
+            })
+            await sleep(300);
+            expect(emitCount).to.be.eq(0);
+            pollingEmitter.start();
+            await sleep(300);
+            expect(emitCount).to.be.greaterThan(0);
+            pollingEmitter.dispose();
+            disposable.dispose();
+        })
+    })
+    describe('stop()', function(){
+        it('Should stop timers emitting data', async function() {
+            const pollingEmitter = new TestPollingEmitter('test-id', 'test-name', 'test-comm-desc', 100, logger);
+            let emitCount = 0;
+            const disposable = pollingEmitter.onData((dataEvt)=>{
+                emitCount++;
+            })
+            pollingEmitter.startPolling();
+            await sleep(300);
+            expect(emitCount).to.be.greaterThan(0);
+            pollingEmitter.stop();
+            emitCount = 0;
+            await sleep(300);
+            expect(emitCount).to.be.eq(0);
+            pollingEmitter.dispose();
+            disposable.dispose();
+        })
     })
     describe('stopPolling', function(){
         it('Should stop timers emitting data', async function() {
