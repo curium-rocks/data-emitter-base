@@ -22,7 +22,7 @@ export interface IService {
 }
 
 /**
- * 
+ * Check if an object implements IService
  * @param {unknown} obj
  * @return {boolean}  
  */
