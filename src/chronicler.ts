@@ -1,4 +1,4 @@
-import { IDisposable } from "./dataEmitter";
+import { IClassifier, IDisposable } from "./dataEmitter";
 
 /**
  * Enforce the object providing controlled 
@@ -17,14 +17,14 @@ export interface IJsonSerializable {
  * Basic Chronicler interface that allows persist a
  * record of the provided object
  */
-export interface IChronicler extends IDisposable {
+export interface IChronicler extends IDisposable, IClassifier {
     /**
      * Save the provided object into a persistent store,
      * uses the 
      * @return {Promise<void>}
      * @param {IJsonSerializable> record 
      */
-    saveRecord(record:IJsonSerializable): Promise<void>
+    saveRecord(record:IJsonSerializable): Promise<void>;
 }
 
 /**

@@ -190,23 +190,27 @@ export function isJsonSerializable(obj:unknown) : boolean {
     return false;
 }
 
+export interface IClassifier {
+    /**
+     * unique id for a resource or entity
+     */
+     readonly id: string;
+
+     /**
+      * name for the resource or entity
+      */
+     readonly name: string;
+ 
+     /**
+      * Description of the resource or entity
+      */
+     readonly description: string;
+}
+
 /**
  * A data source emitter
  */
-export interface IDataEmitter extends IJsonSerializable {
-    /**
-     * The unique identifier for the data source/emitter
-     */
-    readonly id: string; 
-    /**
-     * Human readable name that can be used as a display name for this 
-     * data source/emitter
-     */
-    readonly name: string;
-    /**
-     * A longer description of the data source/emitter
-     */
-    readonly description: string;
+export interface IDataEmitter extends IJsonSerializable, IClassifier {
     
     /**
      * Register a data listener that will receive events on new data
