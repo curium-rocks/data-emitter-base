@@ -1,4 +1,4 @@
-import {IDataEmitter, IDisposable} from "./dataEmitter";
+import {IClassifier, IDataEmitter, IDisposable} from "./dataEmitter";
 import {IChronicler} from "./chronicler";
 
 /**
@@ -88,7 +88,7 @@ export interface  IChroniclerMaestro {
 /**
  * Maestro that connects and manages instances of {IDataEmitter} and {IChronicler}
  */
-export interface IMaestro extends IEmitterMaestro, IChroniclerMaestro {
+export interface IMaestro extends IEmitterMaestro, IChroniclerMaestro, IClassifier {
     /**
      * connect the collection of emitters to the collection of chroniclers,
      * each emitter will save it's records to each of the chroniclers
