@@ -1,18 +1,21 @@
 import { describe, it} from 'mocha';
 import { expect } from 'chai';
 import { ProviderSingleton } from '../src/provider';
-import { IEmitterDescription, IFormatSettings } from '../src/dataEmitter';
+import { IChroniclerFactory, IEmitterDescription, IFormatSettings } from '../src/dataEmitter';
 import { TestEmitter } from './helpers/testEmitter';
-import { IJsonSerializable } from '../src/chronicler';
+import { IChronicler, IJsonSerializable } from '../src/chronicler';
 import { LoggerFacade } from '../src/loggerFacade';
 
 
-const chroniclerFactory = {
+const chroniclerFactory: IChroniclerFactory = {
     buildChronicler: () => {
         return Promise.resolve(chronicler);
     },
     setLoggerFacade: (facade:LoggerFacade) => {
         console.log('logger facade set');
+    },
+    recreateChronicler: (stateData: string, settings: IFormatSettings) => {
+        return Promise.resolve(chronicler);
     }
 }
 const emitterDescription = {
@@ -29,7 +32,7 @@ const chroniclerDescription = {
     type: 'test',
     chroniclerProperties: {}
 }
-const chronicler = {
+const chronicler: IChronicler = {
     id: 'test',
     name: 'test-name',
     description: 'test-description',
@@ -38,6 +41,9 @@ const chronicler = {
     },
     dispose: () => {
         throw new Error("Not Implemented");
+    },
+    serializeState: (settings: IFormatSettings) => {
+        return Promise.resolve("");
     }
 }
 const testEmitter = new TestEmitter('test', 'test', 'test');
@@ -105,6 +111,22 @@ describe( 'Provider', function() {
             const result = await ProviderSingleton.getInstance().buildChronicler(chroniclerDescription);
             expect(result).to.not.be.null;
             expect(result).to.be.eq(chronicler);
+        });
+    });
+    describe( 'recreateChronicler()', function() {
+        it('Should build a chronicler to the same state as before', async function() {
+            const chronicler = await ProviderSingleton.getInstance().buildChronicler(chroniclerDescription);
+            const state = await chronicler.serializeState({
+                encrypted: false,
+                type: 'test'
+            });
+            const recreateChronicler = await ProviderSingleton.getInstance().recreateChronicler(state, {
+                encrypted: false,
+                type: 'test'
+            });
+            expect(recreateChronicler.id).to.be.eq(chronicler.id);
+            expect(recreateChronicler.description).to.be.eq(chronicler.description);
+            expect(recreateChronicler.name).to.be.eq(chronicler.name);
         });
     });
     describe('hasChroniclerFactory()', function() {

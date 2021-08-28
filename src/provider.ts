@@ -55,6 +55,23 @@ class Provider implements IChroniclerProvider, IEmitterProvider {
 
     /**
      * 
+     * @param {string} stateData if encrypted, base64 encoded cipher text, otherwise a json string 
+     * @param {IFormatSettings} formatSettings the format settings describing the state data is encrypted
+     * and if so what cipher type etc.
+     * @return {IChronicler}
+     */
+    recreateChronicler(stateData: string, formatSettings: IFormatSettings) : Promise<IChronicler> {
+        const key = formatSettings.type.toLowerCase();
+        const factory = this._chroncilerFactories.get(key);
+        if(factory != null) {
+            return Promise.resolve(factory.recreateChronicler(stateData, formatSettings));
+        } else {
+            return Promise.reject(new Error(`No chronicler factory found for ${key}`))
+        }
+    }
+
+    /**
+     * 
      * @param {string} type 
      * @param {IChroniclerFactory} factory 
      */

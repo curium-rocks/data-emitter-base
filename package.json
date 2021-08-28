@@ -45,10 +45,15 @@
       ".tsx"
     ],
     "exclude": [
-      "**/*.d.ts"
+      ".eslintrc.js",
+      "docs/**",
+      "coverage/**",
+      "**/*.d.ts",
+      "test/**"
     ],
     "reporter": [
-      "lcov"
+      "lcov",
+      "text"
     ],
     "all": true
   },

@@ -1,5 +1,5 @@
 # data-emitter-base
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=curium-rocks_data-emitter-base&metric=coverage)](https://sonarcloud.io/dashboard?id=curium-rocks_data-emitter-base)[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=curium-rocks_data-emitter-base&metric=security_rating)](https://sonarcloud.io/dashboard?id=curium-rocks_data-emitter-base)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=curium-rocks_data-emitter-base&metric=coverage)](https://sonarcloud.io/dashboard?id=curium-rocks_data-emitter-base) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=curium-rocks_data-emitter-base&metric=security_rating)](https://sonarcloud.io/dashboard?id=curium-rocks_data-emitter-base) ![npm (scoped)](https://img.shields.io/npm/v/@curium.rocks/data-emitter-base)
 
 Contains a set of base classes and interfaces to minimize
 boilerplate code when integrating data sources.

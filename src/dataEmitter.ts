@@ -1,4 +1,5 @@
 import { IChronicler, IJsonSerializable } from "./chronicler";
+import { ISerializableState } from "./common";
 import { LoggerFacade } from "./loggerFacade";
 
 /**
@@ -210,7 +211,7 @@ export interface IClassifier {
 /**
  * A data source emitter
  */
-export interface IDataEmitter extends IJsonSerializable, IClassifier {
+export interface IDataEmitter extends IJsonSerializable, IClassifier, ISerializableState {
     
     /**
      * Register a data listener that will receive events on new data
@@ -240,20 +241,36 @@ export interface IDataEmitter extends IJsonSerializable, IClassifier {
      * Probe the latest data for the data source/emitter
      */
     probeCurrentData(): Promise<IDataEvent>;
-
-    /**
-     * Serialize the state of the emitter in a base64 string
-     */
-    serializeState(settings:IFormatSettings): Promise<string>;
 }
 
 export interface IFormatSettings {
+    /**
+     * Whether the state data is encrypted or not
+     */
     encrypted: boolean;
+    /**
+     * Meta data about the encrypted data, such as an emitter, chronicler type
+     */
     type: string;
+    /**
+     * The algorithm of encryption, such as aes-256-gcm
+     */
     algorithm?: string;
+    /**
+     * Initialization vector to use if available
+     */
     iv?: string;
+    /**
+     * Tag to use if available/applicable
+     */
     tag?: string;
+    /**
+     * key to use
+     */
     key?: string;
+    /**
+     * When using a key store, the name of the key to use
+     */
     keyName?: string;
 }
 
@@ -292,6 +309,7 @@ export interface IChroniclerProvider extends IChroniclerFactory {
 
 export interface IChroniclerFactory {
     buildChronicler(description:IChroniclerDescription) : Promise<IChronicler>;
+    recreateChronicler(base64StateData: string, formatSettings: IFormatSettings) : Promise<IChronicler>;
     setLoggerFacade(loggerFacade: LoggerFacade): void;
 }
 
