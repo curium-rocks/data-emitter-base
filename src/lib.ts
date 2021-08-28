@@ -8,3 +8,4 @@ export {IChronicler, IFileChronicler, IRotatingFileChronicler, IJsonSerializable
 export {IService, IChroniclerMaestro, IEmitterMaestro, IMaestro, isService} from './maestro';
 export {ProviderSingleton} from './provider';
 export {BaseFactory, BaseEmitterFactory, BaseChroniclerFactory } from './factory';
+export {ISerializableState} from './common';
