@@ -244,12 +244,33 @@ export interface IDataEmitter extends IJsonSerializable, IClassifier, ISerializa
 }
 
 export interface IFormatSettings {
+    /**
+     * Whether the state data is encrypted or not
+     */
     encrypted: boolean;
+    /**
+     * Meta data about the encrypted data, such as an emitter, chronicler type
+     */
     type: string;
+    /**
+     * The algorithm of encryption, such as aes-256-gcm
+     */
     algorithm?: string;
+    /**
+     * Initialization vector to use if available
+     */
     iv?: string;
+    /**
+     * Tag to use if available/applicable
+     */
     tag?: string;
+    /**
+     * key to use
+     */
     key?: string;
+    /**
+     * When using a key store, the name of the key to use
+     */
     keyName?: string;
 }
 

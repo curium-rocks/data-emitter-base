@@ -113,6 +113,22 @@ describe( 'Provider', function() {
             expect(result).to.be.eq(chronicler);
         });
     });
+    describe( 'recreateChronicler()', function() {
+        it('Should build a chronicler to the same state as before', async function() {
+            const chronicler = await ProviderSingleton.getInstance().buildChronicler(chroniclerDescription);
+            const state = await chronicler.serializeState({
+                encrypted: false,
+                type: 'test'
+            });
+            const recreateChronicler = await ProviderSingleton.getInstance().recreateChronicler(state, {
+                encrypted: false,
+                type: 'test'
+            });
+            expect(recreateChronicler.id).to.be.eq(chronicler.id);
+            expect(recreateChronicler.description).to.be.eq(chronicler.description);
+            expect(recreateChronicler.name).to.be.eq(chronicler.name);
+        });
+    });
     describe('hasChroniclerFactory()', function() {
         it('Should return false when missing a factory', function() {
             expect(ProviderSingleton.getInstance().hasChroniclerFactory('adadadadada')).to.be.false;
