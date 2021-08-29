@@ -1,5 +1,6 @@
 import {IClassifier, IDataEmitter, IDisposable} from "./dataEmitter";
 import {IChronicler} from "./chronicler";
+import { IDisposableAsync } from "./lib";
 
 /**
  * Methods to start and stop a service,
@@ -88,7 +89,7 @@ export interface  IChroniclerMaestro {
 /**
  * Maestro that connects and manages instances of {IDataEmitter} and {IChronicler}
  */
-export interface IMaestro extends IEmitterMaestro, IChroniclerMaestro, IClassifier {
+export interface IMaestro extends IEmitterMaestro, IChroniclerMaestro, IClassifier, IDisposableAsync {
     /**
      * connect the collection of emitters to the collection of chroniclers,
      * each emitter will save it's records to each of the chroniclers

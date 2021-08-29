@@ -9,13 +9,45 @@ export interface ISerializableState {
      serializeState(settings:IFormatSettings): Promise<string>;
 }
 
+/**
+ *
+ * @param {unknown} obj
+ * @param {string} methodName
+ * @return {boolean}
+ */
+export function hasMethod(obj: unknown, methodName: string) : boolean {
+    if(obj == null) return false;
+    if(typeof obj == 'object') {
+        const val = obj as Record<string, unknown>;
+        return typeof val[methodName] == 'function';
+    }
+    return false;
+}
+
+/**
+ * Check if a object implements IDisposableAsync interface
+ * @param {unknown} obj
+ * @return {boolean}
+ */
+export function isDisposableAsync(obj: unknown) : boolean {
+    return hasMethod(obj, 'disposeAsync');
+}
+
+/**
+ * Checks if an object implements the IDisposable interface
+ * @param {unknown} obj
+ * @return {boolean}
+ */
+export function isDisposable(obj: unknown) : boolean {
+    return hasMethod(obj, 'dispose');
+}
 
 /**
  * 
  * @param {string} json 
  * @param {IFormatSettings} settings 
  */
-    export async function encrypt(json:string, settings:IFormatSettings) : Promise<string> {
+export async function encrypt(json:string, settings:IFormatSettings) : Promise<string> {
     if((settings.algorithm as string).toLowerCase().indexOf('gcm') != -1) {
         const gcmCipher = crypto.createCipheriv(settings.algorithm as CipherGCMTypes, Buffer.from(settings.key as string, 'base64'), Buffer.from(settings.iv as string, 'base64'), {
             authTagLength: 16
