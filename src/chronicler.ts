@@ -1,6 +1,5 @@
 import { encrypt, ISerializableState } from "./common";
-import { IChroniclerDescription, IClassifier, IDataEvent, IFormatSettings, IStatusEvent } from "./dataEmitter";
-import { IDisposableAsync } from "./lib";
+import { IChroniclerDescription, IClassifier, IDataEvent, IDisposableAsync, IFormatSettings, IStatusEvent } from "./dataEmitter";
 
 
 
