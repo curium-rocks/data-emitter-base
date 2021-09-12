@@ -39,8 +39,8 @@ const chronicler: IChronicler = {
     saveRecord: (evt: IJsonSerializable) => {
         return Promise.resolve();
     },
-    dispose: () => {
-        throw new Error("Not Implemented");
+    disposeAsync: () : Promise<void> => {
+        return Promise.reject(Error("Not Implemented"));
     },
     serializeState: (settings: IFormatSettings) => {
         return Promise.resolve("");

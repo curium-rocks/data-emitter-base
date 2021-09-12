@@ -46,7 +46,7 @@ class TestChronicler extends BaseChronicler {
     /**
      * 
      */
-    dispose(): void {
+    disposeAsync(): Promise<void> {
         throw new Error('Method not implemented.');
     }
     

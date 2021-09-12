@@ -1,5 +1,6 @@
 import { encrypt, ISerializableState } from "./common";
-import { IChroniclerDescription, IClassifier, IDataEvent, IDisposable, IFormatSettings, IStatusEvent } from "./dataEmitter";
+import { IChroniclerDescription, IClassifier, IDataEvent, IFormatSettings, IStatusEvent } from "./dataEmitter";
+import { IDisposableAsync } from "./lib";
 
 
 
@@ -33,7 +34,7 @@ export interface IJsonSerializable {
  * Basic Chronicler interface that allows persist a
  * record of the provided object
  */
-export interface IChronicler extends IDisposable, IClassifier, ISerializableState {
+export interface IChronicler extends IDisposableAsync, IClassifier, ISerializableState {
     /**
      * Save the provided object into a persistent store,
      * uses the 
@@ -129,9 +130,11 @@ export abstract class BaseChronicler implements IChronicler {
     abstract getType(): string;
 
     /**
-     * Dispose any resources that will not automatically be cleaned up
+     * Dispose any resources that will not be automatically be cleaned up,
+     * Returns a promise that is resolved when all of the resources have been cleaned up
+     * @return {Promise<void>}
      */
-    abstract dispose(): void;
+    abstract disposeAsync(): Promise<void>;
 
     /**
      * Gets the chronicler description which is used to recreate the chronicler
