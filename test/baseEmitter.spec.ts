@@ -4,7 +4,7 @@ import { TestEmitter } from './helpers/testEmitter';
 import { IDataEmitter, IFormatSettings } from '../src/dataEmitter';
 import { ProviderSingleton } from '../src/provider';
 import crypto from 'crypto';
-import { BaseDataEvent, isDataEvent, isJsonSerializable, isStatusEvent } from '../src/lib';
+import { isDataEvent, isJsonSerializable, isStatusEvent } from '../src/lib';
 
 /**
  * 
