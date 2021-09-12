@@ -53,6 +53,19 @@ export interface IExecutionResult extends ITraceableAction {
 }
 
 /**
+ * Check if an object conforms to the IDataEvent interface
+ * @param {uknown} obj
+ * @return {boolean}
+ */
+ export function isDataEvent(obj: unknown) : boolean {
+    if(obj == null) return false
+    if(typeof obj != 'object') return false;
+    const record = obj as Record<string, unknown>;
+    return record.emitter != null && record.timestamp != null &&
+     record.data != null && record.meta != null;
+}
+
+/**
  * A data emission event
  */
 export interface IDataEvent extends IJsonSerializable {
@@ -74,6 +87,17 @@ export interface IDataEvent extends IJsonSerializable {
     readonly meta: unknown;
 }
 
+/**
+ * Check if an object conforms to the IStatusEvent interface
+ * @param {unknown} obj
+ * @return {boolean}
+ */
+export function isStatusEvent(obj: unknown) : boolean {
+    if(obj == null) return false;
+    if(typeof obj != 'object') return false;
+    const record = obj as Record<string, unknown>
+    return record.connected != null && record.bit != null && record.timestamp != null;
+}
 /**
  * A status event, this include information about connection status changes, built in test failures (BIT) etc
  */
@@ -142,20 +166,6 @@ export interface IDisposable {
  */
 export interface IDisposableAsync {
     disposeAsync(): Promise<void>
-}
-
-/**
- * 
- * @param {Record<string, unknown>} obj 
- * @return {boolean}
- */
-export function isJsonSerializable(obj:unknown) : boolean {
-    if( obj == null) return false;
-    if(typeof obj == 'object') {
-        const val = obj as Record<string, unknown>;
-        return typeof val.toJSON == 'function';
-    }
-    return false;
 }
 
 export interface IClassifier {

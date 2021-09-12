@@ -1,8 +1,10 @@
-import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDataEventListenerFunc, IDisposable, IEmitterDescription, IExecutionResult, IFormatSettings, ISettings, isJsonSerializable, IStatusChangeListener, IStatusChangeListenerFunc, IStatusEvent, ITraceableAction } from "./dataEmitter";
+import { ICommand, IDataEmitter, IDataEvent, IDataEventListener, IDataEventListenerFunc, IDisposable, IEmitterDescription, IExecutionResult, IFormatSettings, ISettings, IStatusChangeListener, IStatusChangeListenerFunc, IStatusEvent, ITraceableAction } from "./dataEmitter";
 import { LoggerFacade, LogLevel } from "./loggerFacade";
 import { ProviderSingleton } from "./provider";
-import { IJsonSerializable } from "./lib";
 import { decrypt, encrypt } from "./common";
+import { IJsonSerializable, isJsonSerializable } from "./chronicler";
+
+
 
 /**
  * 

@@ -1,6 +1,20 @@
-import { encrypt } from "./common";
-import { IClassifier, IDisposable, IFormatSettings } from "./dataEmitter";
-import { IChroniclerDescription, ISerializableState } from "./lib";
+import { encrypt, ISerializableState } from "./common";
+import { IChroniclerDescription, IClassifier, IDataEvent, IDisposable, IFormatSettings, IStatusEvent } from "./dataEmitter";
+
+
+
+/**
+ * Check if any object conforms to the IJsonSerializable interface
+ * @param {unknown} obj 
+ * @return {boolean}
+ */
+export function isJsonSerializable(obj: unknown) : boolean {
+    if(obj == null) return false;
+    if(typeof obj !== 'object') return false;
+    const record = obj as Record<string, unknown>;
+    if(record.toJSON == null) return false;
+    return typeof record.toJSON === 'function';
+}
 
 /**
  * Enforce the object providing controlled 
@@ -24,9 +38,9 @@ export interface IChronicler extends IDisposable, IClassifier, ISerializableStat
      * Save the provided object into a persistent store,
      * uses the 
      * @return {Promise<void>}
-     * @param {IJsonSerializable> record 
+     * @param {IJsonSerializable|IDataEvent|IStatusEvent} record 
      */
-    saveRecord(record:IJsonSerializable): Promise<void>;
+    saveRecord(record:IJsonSerializable|IDataEvent|IStatusEvent): Promise<void>;
 }
 
 /**
