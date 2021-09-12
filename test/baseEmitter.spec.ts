@@ -1,9 +1,10 @@
 import { describe, it} from 'mocha';
 import { expect } from 'chai';
 import { TestEmitter } from './helpers/testEmitter';
-import { IDataEmitter, IFormatSettings, isJsonSerializable } from '../src/dataEmitter';
+import { IDataEmitter, IFormatSettings } from '../src/dataEmitter';
 import { ProviderSingleton } from '../src/provider';
 import crypto from 'crypto';
+import { BaseDataEvent, isDataEvent, isJsonSerializable, isStatusEvent } from '../src/lib';
 
 /**
  * 
@@ -29,6 +30,38 @@ async function validateStateRestoration(formatSettings:IFormatSettings) : Promis
     expect(result).to.not.be.null;
     await validateRecreate(emitter, result, formatSettings);
 }
+describe( 'isStatusEvent()', function() {
+    it( 'Should return false for null', function() {
+        expect(isStatusEvent(null)).to.be.false;
+    });
+    it( 'Should return false for a string', function() {
+        expect(isStatusEvent('test')).to.be.false;
+    });
+    it( 'Should return true when all properties are met', function() {
+        expect(isStatusEvent({
+            emitter: {},
+            connected: {},
+            bit: {},
+            timestamp: {}
+        })).to.be.true;
+    });
+})
+describe( 'isDataEvent()', function() {
+    it( 'Should return false for null', function() {
+        expect(isDataEvent(null)).to.be.false;
+    });
+    it( 'Should return false for a string', function() {
+        expect(isDataEvent('test')).to.be.false;
+    });
+    it( 'Should return true when all properties are met', function() {
+        expect(isDataEvent({
+            emitter: {},
+            meta: {},
+            timestamp: {},
+            data: {}
+        })).to.be.true;
+    });
+})
 describe( 'isJSONSerializable()', function() {
     it( 'Should return false for null', function() {
         expect(isJsonSerializable(null)).to.be.false;
