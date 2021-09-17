@@ -10,6 +10,7 @@ import { IJsonSerializable, isJsonSerializable } from "./chronicler";
  * 
  */
 export class BaseStatusEvent implements IStatusEvent {
+    emitter: IDataEmitter;
     connected: boolean;
     bit: boolean;
     timestamp: Date;
@@ -18,11 +19,13 @@ export class BaseStatusEvent implements IStatusEvent {
      * 
      * @param {boolean} connected 
      * @param {boolean} bit 
+     * @param {IDataEmitter} emitter
      * @param {Date} timestamp 
      */
-    constructor(connected: boolean, bit: boolean, timestamp?: Date) {
+    constructor(connected: boolean, bit: boolean, emitter: IDataEmitter, timestamp?: Date) {
         this.connected = connected;
         this.bit = bit;
+        this.emitter = emitter;
         this.timestamp = timestamp || new Date();
     }
 
@@ -341,7 +344,7 @@ export abstract class BaseEmitter implements IDataEmitter, IDisposable {
      * @return {IStatusEvent} 
      */
     protected buildStatusEvent(): IStatusEvent {
-        return new BaseStatusEvent(this._connected, this._faulted);
+        return new BaseStatusEvent(this._connected, this._faulted, this);
     }
 
     /**
