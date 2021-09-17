@@ -2,6 +2,7 @@ import { BaseEmitter, BaseStatusEvent } from "../../src/baseEmitter";
 import { ICommand, IExecutionResult, IStatusEvent, IDataEvent, IDataEmitter, IEmitterDescription } from "../../src/dataEmitter";
 import { ProviderSingleton } from "../../src/provider";
 import { BaseEmitterFactory } from "../../src/factory";
+import { LoggerFacade } from "../../src/loggerFacade";
 
 /**
  * 
@@ -17,13 +18,25 @@ export class TestEmitter extends BaseEmitter {
         actionId: "n/a"
     };
 
-    public statusEvent: IStatusEvent = new BaseStatusEvent(false, true);
+    public statusEvent: IStatusEvent;
 
     public dataEvent: IDataEvent|undefined;
 
     public metaData: unknown = {
 
     };
+
+    /**
+     * Test Data Emitter\
+     * @param {string} id
+     * @param {string} name
+     * @param {string} desc
+     * @param {LoggerFacade|undefined} logger
+     */
+    constructor(id: string, name: string, desc: string, logger?: LoggerFacade) {
+        super(id, name, desc, logger);
+        this.statusEvent = new BaseStatusEvent(false, true, this);
+    }
 
     /**
      * 

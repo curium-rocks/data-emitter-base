@@ -65,14 +65,17 @@ export interface IExecutionResult extends ITraceableAction {
      record.data != null && record.meta != null;
 }
 
+export interface IEmitterEvent extends IJsonSerializable {
+    /**
+     * Source of the event
+     */
+    readonly emitter: IDataEmitter;
+}
+
 /**
  * A data emission event
  */
-export interface IDataEvent extends IJsonSerializable {
-    /**
-     *  Source of the event
-     */
-    readonly emitter: IDataEmitter;
+export interface IDataEvent extends IEmitterEvent {
     /**
      * Time of data event
      */
@@ -101,7 +104,8 @@ export function isStatusEvent(obj: unknown) : boolean {
 /**
  * A status event, this include information about connection status changes, built in test failures (BIT) etc
  */
-export interface IStatusEvent extends IJsonSerializable {
+export interface IStatusEvent extends IEmitterEvent {
+
     /**
      * source connection state
      */
