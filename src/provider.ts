@@ -12,6 +12,7 @@ class Provider implements IChroniclerProvider, IEmitterProvider {
     
     private readonly _emitterFactories: Map<string, IEmitterFactory> = new Map<string, IEmitterFactory>();
     private readonly _chroncilerFactories: Map<string, IChroniclerFactory> = new Map<string, IChroniclerFactory>();
+    private logger?:LoggerFacade;
 
     /**
      * 
@@ -19,6 +20,7 @@ class Provider implements IChroniclerProvider, IEmitterProvider {
      * @param {IEmitterFactory} factory 
      */
     registerEmitterFactory(type: string, factory: IEmitterFactory): void {
+        if(this.logger) factory.setLoggerFacade(this.logger);
         this._emitterFactories.set(type.toLowerCase(), factory);
     }
 
@@ -76,6 +78,7 @@ class Provider implements IChroniclerProvider, IEmitterProvider {
      * @param {IChroniclerFactory} factory 
      */
     registerChroniclerFactory(type: string, factory: IChroniclerFactory): void {
+        if(this.logger) factory.setLoggerFacade(this.logger);
         this._chroncilerFactories.set(type.toLowerCase(), factory);
     }
 
@@ -151,6 +154,7 @@ class Provider implements IChroniclerProvider, IEmitterProvider {
      * @param {LoggerFacade} loggerFacade 
      */
     setLoggerFacade(loggerFacade: LoggerFacade): void {
+        this.logger = loggerFacade;
         this._emitterFactories.forEach((val) => {
             val.setLoggerFacade(loggerFacade);
         });
